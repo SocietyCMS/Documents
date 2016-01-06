@@ -1,15 +1,17 @@
 {
-	"name": "pingpong-modules/documents",
-	"description": "",
-	"authors": [
-		{
-			"name": "Pingpong Labs",
-			"email": "pingpong.labs@gmail.com"
-		}
-	],
-	"autoload": {
-		"psr-4": {
-			"Modules\\Documents\\": ""
-		}
-	}
+  "name": "pingpong-modules/documents",
+  "description": "",
+  "authors": [
+    {
+      "name": "Pingpong Labs",
+      "email": "pingpong.labs@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Modules\\Documents\\": ""
+    }
+  },
+  "require": {
+  }
 }

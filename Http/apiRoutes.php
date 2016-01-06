@@ -9,5 +9,8 @@ $api->version('v1', function ($api) {
     ], function ($api) {
 
         $api->resource('file', 'FileController');
+
+        $api->resource('download', 'FileController', ['only' => 'show']);
+
     });
 });
