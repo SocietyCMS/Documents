@@ -8,7 +8,7 @@ $api->version('v1', function ($api) {
         'providers'  => ['jwt'],
     ], function ($api) {
 
-        $api->resource('file', 'FileController');
+        $api->resource('file', 'FileController',  ['only' => ['index', 'store', 'show', 'update', 'destroy']]);
 
         $api->resource('download', 'FileController', ['only' => 'show']);
 

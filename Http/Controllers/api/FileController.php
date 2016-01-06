@@ -69,6 +69,17 @@ class FileController extends ApiBaseController
 
     /**
      * @param Request $request
+     * @return mixed
+     */
+    public function update(Request $request, $file)
+    {
+        $file = null;
+
+        return $this->response->item($file, new FileTransformer());
+    }
+
+    /**
+     * @param Request $request
      * @param         $file
      * @return mixed
      */
