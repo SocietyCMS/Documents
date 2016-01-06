@@ -1,0 +1,16 @@
+{
+    "name": "Documents",
+    "alias": "documents",
+    "description": "",
+    "keywords": [],
+    "active": 1,
+    "order": 10,
+    "providers": [
+        "Modules\\Documents\\Providers\\DocumentsServiceProvider",
+        "Modules\\Documents\\Providers\\RouteServiceProvider"
+    ],
+    "aliases":{},
+    "files": [
+        "start.php"
+    ]
+}
