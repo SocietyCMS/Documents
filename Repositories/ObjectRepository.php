@@ -4,8 +4,9 @@ namespace Modules\Documents\Repositories;
 
 use Modules\Core\Repositories\Eloquent\EloquentHashidsRepository;
 
-class FileRepository extends EloquentHashidsRepository
+class ObjectRepository extends EloquentHashidsRepository
 {
+
     /**
      * Specify Model class name.
      *
@@ -13,6 +14,6 @@ class FileRepository extends EloquentHashidsRepository
      */
     public function model()
     {
-        return 'Modules\\Documents\\Entities\\File';
+        return 'Modules\\Documents\\Entities\\Object';
     }
 }

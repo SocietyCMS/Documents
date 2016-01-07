@@ -9,10 +9,13 @@ class FileTransformer extends Fractal\TransformerAbstract
     public function transform($file)
     {
         return [
-            'id' => $file->id,
+            'uid' => $file->uid,
             'title' => $file->title,
             'description' => $file->description,
 
+            'tag' => $file->tag,
+            'name' => $file->name,
+            'parent_uid'  => $file->parent_uid,
             'mimeType' => $file->mimeType,
             'originalFilename' => $file->originalFilename,
             'md5Checksum' => $file->md5Checksum,
@@ -29,6 +32,8 @@ class FileTransformer extends Fractal\TransformerAbstract
             'created_at' => $file->created_at->toRfc3339String(),
             'updated_at' => $file->updated_at->toRfc3339String(),
             'deleted_at' => isset($file->deleted_at)?$file->deleted_at->toRfc3339String():null,
+
+            'pool_uid' => $file->pool_uid
         ];
     }
 }

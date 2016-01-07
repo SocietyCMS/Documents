@@ -9,6 +9,9 @@ $api->version('v1', function ($api) {
     ], function ($api) {
 
 
+        $api->get('pool', ['as' => 'api.documents.pool.index', 'uses'=> 'PoolController@index']);
+        $api->get('pool/{id}', ['as' => 'api.documents.pool.show', 'uses'=> 'PoolController@get']);
+
         $api->get('{pool}/file', ['as' => 'api.documents.file.index', 'uses'=> 'FileController@index']);
         $api->post('{pool}/file', ['as' => 'api.documents.file.store', 'uses'=> 'FileController@store']);
         $api->get('{pool}/file/{id}', ['as' => 'api.documents.file.get', 'uses'=> 'FileController@get']);
@@ -18,8 +21,7 @@ $api->version('v1', function ($api) {
 
         $api->get('{pool}/download/{id}', ['as' => 'api.documents.file.download', 'uses'=> 'DownloadController@download']);
 
-        $api->post('{pool}/list_folder',  ['as' => 'api.documents.file.list_folder', 'uses'=> 'FolderController@list_folder']);
-
+        $api->post('{pool}/list_folder',  ['as' => 'api.documents.list_folder', 'uses'=> 'FolderController@list_folder']);
 
     });
 });

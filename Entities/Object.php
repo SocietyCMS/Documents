@@ -4,6 +4,7 @@ namespace Modules\Documents\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Traits\Entities\EloquentHashids;
 use Modules\Core\Traits\Entities\transformHashids;
 use Modules\User\Traits\Activity\RecordsActivity;
 use Vinkla\Hashids\Facades\Hashids;
@@ -13,18 +14,18 @@ use Vinkla\Hashids\Facades\Hashids;
  * Class Event
  * @package Modules\Calendar\Entities
  */
-class File extends Model
+class Object extends Model
 {
     use RecordsActivity;
     use SoftDeletes;
-    use transformHashids;
+    use EloquentHashids;
 
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'documents__file';
+    protected $table = 'documents__objects';
 
     /**
      * The fillable properties of the model.
@@ -34,6 +35,7 @@ class File extends Model
     protected $fillable = [
         'title',
         'mimeType',
+        'tag',
         'description',
         'originalFilename',
         'fileExtension',
@@ -56,11 +58,11 @@ class File extends Model
     protected $dates = ['deleted_at'];
 
     /**
-     * Get the pool that owns this file.
+     * Get the pool that this object belongs to.
      */
     public function pool()
     {
-        return $this->belongsTo('Modules\Documents\Entities\Pool');
+        return $this->belongsTo('Modules\Documents\Entities\Pool', 'pool_uid', 'uid');
     }
 
 }

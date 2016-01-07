@@ -4,7 +4,7 @@ namespace Modules\Documents\Http\Controllers\api;
 
 use Illuminate\Http\Request;
 use Modules\Core\Http\Controllers\ApiBaseController;
-use Modules\Documents\Repositories\FileRepository;
+use Modules\Documents\Repositories\ObjectRepository;
 use Modules\Documents\Transformers\FileTransformer;
 
 
@@ -16,16 +16,16 @@ class DownloadController extends ApiBaseController
 {
 
     /**
-     * @var FileRepository
+     * @var ObjectRepository
      */
     private $repository;
 
 
     /**
      * FileController constructor.
-     * @param FileRepository $repository
+     * @param ObjectRepository $repository
      */
-    public function __construct(FileRepository $repository)
+    public function __construct(ObjectRepository $repository)
     {
         parent::__construct();
 

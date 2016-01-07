@@ -4,6 +4,7 @@ namespace Modules\Documents\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Traits\Entities\EloquentHashids;
 use Modules\Core\Traits\Entities\transformHashids;
 
 
@@ -14,7 +15,7 @@ use Modules\Core\Traits\Entities\transformHashids;
 class Pool extends Model
 {
     use SoftDeletes;
-    use transformHashids;
+    use EloquentHashids;
 
     /**
      * The table associated with the model.
@@ -45,7 +46,7 @@ class Pool extends Model
      */
     public function files()
     {
-        return $this->hasMany('Modules\Documents\Entities\File');
+        return $this->hasMany('Modules\Documents\Entities\Object', 'pool_uid', 'uid');
     }
 
 }

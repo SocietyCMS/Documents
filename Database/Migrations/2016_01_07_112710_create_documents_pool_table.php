@@ -14,7 +14,9 @@ class CreateDocumentsPoolTable extends Migration
     {
         Schema::create('documents__pool', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('title');
+            $table->string('uid')->index()->unique();
+
+            $table->string('title')->index();
             $table->text('description');
 
             $table->bigInteger('quota')->unsigned();
