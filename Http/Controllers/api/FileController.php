@@ -25,7 +25,7 @@ class FileController extends ApiBaseController
      * FileController constructor.
      * @param FileRepository $repository
      */
-    public function __construct(FileRepository $repository)
+    public function __construct(FileRepository $repository, Request $request)
     {
         parent::__construct();
 
@@ -61,7 +61,7 @@ class FileController extends ApiBaseController
      * @param         $file
      * @return mixed
      */
-    public function show(Request $request, $file)
+    public function get(Request $request, $file)
     {
         $file = $this->repository->find($file);
         return $this->response->item($file, new FileTransformer());

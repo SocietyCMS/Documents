@@ -18,7 +18,7 @@ class FileTransformer extends Fractal\TransformerAbstract
             'md5Checksum' => $file->md5Checksum,
             'fileSize' => $file->fileSize,
 
-            'downloadUrl' => apiRoute('v1', 'api.documents.download.show', $file->id),
+            'downloadUrl' => apiRoute('v1', 'api.documents.file.download', $file->id),
 
             'shared' => (bool)$file->shared,
 
