@@ -69,7 +69,7 @@ class PoolController extends ApiBaseController
      */
     public function get(Request $request, $pool)
     {
-        $pool = $this->repository->find($pool);
+        $pool = $this->repository->findByUid($pool);
         return $this->response->item($pool, new PoolTransformer());
     }
 
@@ -91,7 +91,7 @@ class PoolController extends ApiBaseController
      */
     public function destroy(Request $request, $pool)
     {
-        $pool = $this->repository->find($pool);
+        $pool = $this->repository->findByUid($pool);
 
         $pool->delete();
 

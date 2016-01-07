@@ -17,14 +17,14 @@ class FileController extends ApiBaseController
 {
 
     /**
-     * @var FileRepository
+     * @var ObjectRepository
      */
     private $repository;
 
 
     /**
      * FileController constructor.
-     * @param FileRepository $repository
+     * @param ObjectRepository $repository
      */
     public function __construct(ObjectRepository $repository, Request $request)
     {
@@ -40,19 +40,6 @@ class FileController extends ApiBaseController
      */
     public function index(Request $request)
     {
-        /*return $this->repository->create([
-            'title' => 'File1',
-            'mimeType' => 'application/pdf',
-            'tag' => 'file',
-            'description' => 'A typical PDF',
-            'originalFilename' => 'non_special_pdf_v1.pdf',
-            'fileExtension' => 'pdf',
-            'md5Checksum' => md5('non_special_pdf_v1.pdf'),
-            'fileSize' => 1789415,
-            'shared' => false,
-            'user_id' => 1,
-        ]);
-*/
         $files = $this->repository->paginate(15);
         $meta = [
             'directory' => '/'
@@ -80,7 +67,7 @@ class FileController extends ApiBaseController
      */
     public function get(Request $request, $file)
     {
-        $file = $this->repository->find($file);
+        $file = $this->repository->findByUid($file);
         return $this->response->item($file, new FileTransformer());
     }
 

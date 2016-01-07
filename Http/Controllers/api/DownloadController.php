@@ -39,7 +39,7 @@ class DownloadController extends ApiBaseController
      */
     public function download(Request $request, $file)
     {
-        $file = $this->repository->find($file);
+        $file = $this->repository->findByUid($file);
         return $this->response->item($file, new FileTransformer());
     }
 }
