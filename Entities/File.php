@@ -4,6 +4,7 @@ namespace Modules\Documents\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Traits\Entities\transformHashids;
 use Modules\User\Traits\Activity\RecordsActivity;
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -16,6 +17,7 @@ class File extends Model
 {
     use RecordsActivity;
     use SoftDeletes;
+    use transformHashids;
 
     /**
      * The table associated with the model.
@@ -52,15 +54,5 @@ class File extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
-
-    /**
-     * Transform id to hashid
-     * @param $value
-     * @return mixed
-     */
-    public function getIdAttribute($value)
-    {
-        return Hashids::encode($value);
-    }
 
 }
