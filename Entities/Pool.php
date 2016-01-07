@@ -5,17 +5,14 @@ namespace Modules\Documents\Entities;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Traits\Entities\transformHashids;
-use Modules\User\Traits\Activity\RecordsActivity;
-use Vinkla\Hashids\Facades\Hashids;
 
 
 /**
  * Class Event
  * @package Modules\Calendar\Entities
  */
-class File extends Model
+class Pool extends Model
 {
-    use RecordsActivity;
     use SoftDeletes;
     use transformHashids;
 
@@ -24,7 +21,7 @@ class File extends Model
      *
      * @var string
      */
-    protected $table = 'documents__file';
+    protected $table = 'documents__pool';
 
     /**
      * The fillable properties of the model.
@@ -33,34 +30,22 @@ class File extends Model
      */
     protected $fillable = [
         'title',
-        'mimeType',
         'description',
-        'originalFilename',
-        'fileExtension',
-        'md5Checksum',
-        'fileSize',
-        'shared',
-        'user_id'
+        'quota'
     ];
-
-    /**
-     * Views for the Dashboard timeline.
-     *
-     * @var string
-     */
-    protected static $templatePath = 'documents::backend.activities';
 
     /**
      * @var array
      */
     protected $dates = ['deleted_at'];
 
+
     /**
-     * Get the pool that owns this file.
+     * Get the files in this pool.
      */
-    public function pool()
+    public function files()
     {
-        return $this->belongsTo('Modules\Documents\Entities\Pool');
+        return $this->hasMany('Modules\Documents\Entities\File');
     }
 
 }

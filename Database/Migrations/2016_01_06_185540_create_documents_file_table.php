@@ -27,6 +27,8 @@ class CreateDocumentsFileTable extends Migration
 
             $table->integer('user_id')->unsigned();
 
+            $table->integer('pool_id')->unsigned();
+
             $table->timestamps();
             $table->softDeletes();
         });
