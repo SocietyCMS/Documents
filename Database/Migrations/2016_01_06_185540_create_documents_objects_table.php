@@ -21,7 +21,6 @@ class CreateDocumentsObjectsTable extends Migration
             $table->string('tag')->index();
             $table->text('description');
 
-            $table->string('name')->nullable();
             $table->string('parent_uid')->nullable();
 
             $table->string('originalFilename')->index();

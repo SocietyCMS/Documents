@@ -9,20 +9,20 @@ use Prettus\Repository\Contracts\CriteriaInterface;
  * Class PoolCriteria
  * @package Modules\Documents\Repositories\Criterias
  */
-class PoolCriteria implements CriteriaInterface
+class withTrashCriteria implements CriteriaInterface
 {
     /**
      * @var
      */
-    private $pool;
+    private $with_trash;
 
     /**
      * PoolCriteria constructor.
-     * @param $pool
+     * @param $with_trash
      */
-    public function __construct($pool)
+    public function __construct($with_trash)
     {
-        $this->pool = $pool;
+        $this->with_trash = (bool) $with_trash;
     }
 
 
@@ -33,7 +33,11 @@ class PoolCriteria implements CriteriaInterface
      */
     public function apply($model, RepositoryInterface $repository)
     {
-        $model = $model->where('pool_uid', '=', $this->pool);
+        if($this->with_trash)
+        {
+            $model = $model->withTrashed();
+        }
+
         return $model;
     }
 }

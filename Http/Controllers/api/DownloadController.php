@@ -5,7 +5,7 @@ namespace Modules\Documents\Http\Controllers\api;
 use Illuminate\Http\Request;
 use Modules\Core\Http\Controllers\ApiBaseController;
 use Modules\Documents\Repositories\ObjectRepository;
-use Modules\Documents\Transformers\FileTransformer;
+use Modules\Documents\Transformers\ObjectTransformer;
 
 
 /**
@@ -40,6 +40,6 @@ class DownloadController extends ApiBaseController
     public function download(Request $request, $file)
     {
         $file = $this->repository->findByUid($file);
-        return $this->response->item($file, new FileTransformer());
+        return $this->response->item($file, new ObjectTransformer());
     }
 }

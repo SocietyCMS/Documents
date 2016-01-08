@@ -9,20 +9,20 @@ use Prettus\Repository\Contracts\CriteriaInterface;
  * Class PoolCriteria
  * @package Modules\Documents\Repositories\Criterias
  */
-class PoolCriteria implements CriteriaInterface
+class ParentCriteria implements CriteriaInterface
 {
     /**
      * @var
      */
-    private $pool;
+    private $parent_uid;
 
     /**
      * PoolCriteria constructor.
-     * @param $pool
+     * @param $parent_uid
      */
-    public function __construct($pool)
+    public function __construct($parent_uid)
     {
-        $this->pool = $pool;
+        $this->parent_uid = $parent_uid;
     }
 
 
@@ -33,7 +33,7 @@ class PoolCriteria implements CriteriaInterface
      */
     public function apply($model, RepositoryInterface $repository)
     {
-        $model = $model->where('pool_uid', '=', $this->pool);
+        $model = $model->where('parent_uid', '=', $this->parent_uid);
         return $model;
     }
 }

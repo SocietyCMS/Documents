@@ -4,6 +4,7 @@ namespace Modules\Documents\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 use Modules\Core\Traits\Entities\EloquentHashids;
 use Modules\Core\Traits\Entities\transformHashids;
 use Modules\User\Traits\Activity\RecordsActivity;
@@ -42,7 +43,8 @@ class Object extends Model
         'md5Checksum',
         'fileSize',
         'shared',
-        'user_id'
+        'user_id',
+        'parent_uid'
     ];
 
     /**
@@ -56,6 +58,38 @@ class Object extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+
+    /**
+     * Get the pool that this object belongs to.
+     */
+    public function getPath()
+    {
+        if ($this->parent == null) {
+            return '/'.$this->getObjectName();
+        }
+        return $this->parent->getPath().'/'.$this->getObjectName();
+    }
+
+    /**
+     * Get the pool that this object belongs to.
+     */
+    public function getObjectName()
+    {
+        if ($this->fileExtension) {
+            return Str::slug($this->title).'.'.$this->fileExtension;
+        }
+
+        return Str::slug($this->title);
+    }
+
+    /**
+     * Get the parent of this object.
+     */
+    public function parent()
+    {
+        return $this->belongsTo('Modules\Documents\Entities\Object', 'parent_uid', 'uid');
+    }
 
     /**
      * Get the pool that this object belongs to.
