@@ -9,7 +9,7 @@ use Prettus\Validator\Contracts\ValidatorInterface;
  * Class PoolValidator
  * @package Modules\Documents\Repositories\Validators
  */
-class PoolValidator extends BaseValidator
+class FileValidator extends BaseValidator
 {
 
     /**
@@ -20,13 +20,15 @@ class PoolValidator extends BaseValidator
         ValidatorInterface::RULE_CREATE => [
             'title'       => 'required',
             'description' => 'min:3',
-            'quota'       => 'integer',
+            'parent_uid'  => 'exists:documents__objects,uid',
+            'shared'      => 'boolean',
         ],
         ValidatorInterface::RULE_UPDATE => [
-            'title' => 'required',
-            'description'  => 'min:3',
-            'quota'=> 'integer'
-        ]
+            'title'       => 'required',
+            'description' => 'min:3',
+            'parent_uid'  => 'exists:documents__objects,uid',
+            'shared'      => 'boolean',
+        ],
     ];
 
 

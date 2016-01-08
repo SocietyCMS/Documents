@@ -15,20 +15,20 @@ class CreateDocumentsObjectsTable extends Migration
         Schema::create('documents__objects', function (Blueprint $table) {
             $table->increments('id');
             $table->string('uid')->index()->unique();
+            $table->string('tag')->index();
 
             $table->string('title')->index();
-            $table->string('mimeType')->index();
-            $table->string('tag')->index();
-            $table->text('description');
+            $table->text('description')->nullable();
 
             $table->string('parent_uid')->nullable();
 
-            $table->string('originalFilename')->index();
-            $table->string('fileExtension');
-            $table->string('md5Checksum')->index();
+            $table->string('mimeType')->index()->nullable();
+            $table->string('originalFilename')->index()->nullable();
+            $table->string('fileExtension')->nullable();
+            $table->string('md5Checksum')->index()->nullable();
             $table->bigInteger('fileSize')->unsigned()->nullable();
 
-            $table->boolean('shared')->default(false);
+            $table->boolean('shared')->default(false)->nullable();
 
             $table->integer('user_id')->unsigned();
 

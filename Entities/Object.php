@@ -35,16 +35,11 @@ class Object extends Model
      */
     protected $fillable = [
         'title',
-        'mimeType',
-        'tag',
         'description',
-        'originalFilename',
-        'fileExtension',
-        'md5Checksum',
-        'fileSize',
         'shared',
         'user_id',
-        'parent_uid'
+        'parent_uid',
+        'pool_uid'
     ];
 
     /**

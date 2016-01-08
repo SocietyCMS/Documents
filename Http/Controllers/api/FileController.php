@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use Modules\Core\Http\Controllers\ApiBaseController;
 use Modules\Documents\Repositories\Criterias\PoolCriteria;
 use Modules\Documents\Repositories\ObjectRepository;
+use Modules\Documents\Repositories\Validators\FileValidator;
 use Modules\Documents\Transformers\ObjectTransformer;
+use Prettus\Validator\Contracts\ValidatorInterface;
 
 
 /**
@@ -21,6 +23,11 @@ class FileController extends ApiBaseController
      */
     private $repository;
 
+    /**
+     * @var null|\Prettus\Validator\Contracts\ValidatorInterface
+     */
+    private $validator;
+
 
     /**
      * FileController constructor.
@@ -30,6 +37,7 @@ class FileController extends ApiBaseController
     {
         parent::__construct();
         $this->repository = $repository;
+        $this->validator = $this->repository->makeValidator(FileValidator::class);
         $this->repository->pushCriteria(new PoolCriteria($request->pool));
     }
 
@@ -42,10 +50,10 @@ class FileController extends ApiBaseController
     {
         $files = $this->repository->paginate(15);
         $meta = [
-            'directory' => '/'
+            'directory' => '/',
         ];
 
-        return $this->response->paginator($files, new FileTransformer())->setMeta($meta);
+        return $this->response->paginator($files, new ObjectTransformer())->setMeta($meta);
     }
 
 
@@ -55,7 +63,24 @@ class FileController extends ApiBaseController
      */
     public function store(Request $request)
     {
-        $file = null;
+        if ($this->validator->with($request->input())->fails(ValidatorInterface::RULE_CREATE)) {
+            throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not create new file.', $this->validator->errors());
+        }
+        if (is_null($request->file('data-binary'))) {
+            throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not create new file.', ['data-binary is not a file']);
+        }
+
+        $file = $this->repository->create([
+            'title'       => $request->title,
+            'description' => $request->description,
+            'parent_uid'  => $request->parent_uid,
+            'shared'      => $request->shared,
+            'user_id'     => $this->user()->id,
+            'pool_uid'    => $request->pool,
+        ]);
+
+        $file = $this->updateComputedProperties($request, $file);
+
 
         return $this->response->item($file, new ObjectTransformer());
     }
@@ -65,9 +90,10 @@ class FileController extends ApiBaseController
      * @param         $file
      * @return mixed
      */
-    public function get(Request $request, $file)
+    public function get(Request $request)
     {
-        $file = $this->repository->findByUid($file);
+        $file = $this->repository->findByUid($request->file);
+
         return $this->response->item($file, new ObjectTransformer());
     }
 
@@ -75,9 +101,23 @@ class FileController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function update(Request $request, $file)
+    public function update(Request $request)
     {
-        $file = null;
+        if ($this->validator->with(array_merge($request->input(), ['uid' => $request->file]))->fails(ValidatorInterface::RULE_UPDATE)) {
+            throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not update file.', $this->validator->errors());
+        }
+
+        $file_id = $this->repository->findByUid($request->file)->id;
+        $file = $this->repository->update([
+            'title'       => $request->title,
+            'description' => $request->description,
+            'parent_uid'  => $request->parent_uid,
+            'shared'      => $request->shared,
+            'user_id'     => $this->user()->id,
+            'pool_uid'    => $request->pool,
+        ], $file_id);
+
+        $file = $this->updateComputedProperties($request, $file);
 
         return $this->response->item($file, new ObjectTransformer());
     }
@@ -87,12 +127,37 @@ class FileController extends ApiBaseController
      * @param         $file
      * @return mixed
      */
-    public function destroy(Request $request, $file)
+    public function destroy(Request $request)
     {
-        $file = $this->repository->find($file);
+        $file = $this->repository->findByUid($request->file);
 
         $file->delete();
 
-        return $this->response->successDeleted();
+        return $this->successDeleted();
+    }
+
+    /**
+     * @param Request $request
+     * @param         $file
+     * @return mixed
+     */
+    private function updateComputedProperties(Request $request, $file)
+    {
+        if ($request->file('data-binary')) {
+
+            $file->tag = 'file';
+
+            $file->mimeType = $request->file('data-binary')->getMimeType();
+
+            $file->originalFilename = $request->file('data-binary')->getClientOriginalName();
+            $file->fileSize = $request->file('data-binary')->getSize();
+            $file->fileExtension = $request->file('data-binary')->guessExtension() ?: $request->file('data-binary')->getClientOriginalExtension();
+
+            $file->md5Checksum = md5_file($request->file('data-binary')->getPathname());
+
+            $file->save();
+        }
+
+        return $file;
     }
 }

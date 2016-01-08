@@ -3,22 +3,10 @@
 namespace Modules\Documents\Repositories;
 
 use Modules\Core\Repositories\Eloquent\EloquentHashidsRepository;
-use Prettus\Validator\Contracts\ValidatorInterface;
+use Prettus\Validator\Exceptions\ValidatorException;
 
 class ObjectRepository extends EloquentHashidsRepository
 {
-
-    protected $rules = [
-        ValidatorInterface::RULE_CREATE => [
-            'title' => 'required',
-            'text'  => 'min:3',
-            'author'=> 'required'
-        ],
-        ValidatorInterface::RULE_UPDATE => [
-            'title' => 'required'
-        ]
-    ];
-
 
     /**
      * Specify Model class name.
@@ -28,5 +16,15 @@ class ObjectRepository extends EloquentHashidsRepository
     public function model()
     {
         return 'Modules\\Documents\\Entities\\Object';
+    }
+
+    /**
+     * Specify Validator class name
+     *
+     * @return mixed
+     */
+    public function validator()
+    {
+        return "Modules\\Documents\\Repositories\\Validators\\ObjectValidator";
     }
 }

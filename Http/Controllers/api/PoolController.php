@@ -75,9 +75,9 @@ class PoolController extends ApiBaseController
      * @param         $pool
      * @return mixed
      */
-    public function get(Request $request, $pool)
+    public function get(Request $request)
     {
-        $pool = $this->repository->findByUid($pool);
+        $pool = $this->repository->findByUid($request->pool);
 
         return $this->response->item($pool, new PoolTransformer());
     }
@@ -86,15 +86,14 @@ class PoolController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function update(Request $request, $pool)
+    public function update(Request $request)
     {
-        if ($this->validator->with(array_merge($request->input(), ['uid' => $pool]))->fails(ValidatorInterface::RULE_UPDATE)) {
+        if ($this->validator->with(array_merge($request->input(), ['uid' => $request->pool]))->fails(ValidatorInterface::RULE_UPDATE)) {
             throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not create new pool.', $this->validator->errors());
         }
 
-        $pool_id = $this->repository->findByUid($pool)->id;
+        $pool_id = $this->repository->findByUid($request->pool)->id;
         $item = $this->repository->update([
-            'uid'         => $pool,
             'title'       => $request->title,
             'description' => $request->description,
             'quota'       => $request->quota,
@@ -108,9 +107,9 @@ class PoolController extends ApiBaseController
      * @param         $pool
      * @return mixed
      */
-    public function destroy(Request $request, $pool)
+    public function destroy(Request $request)
     {
-        $pool = $this->repository->findByUid($pool);
+        $pool = $this->repository->findByUid($request->pool);
 
         $pool->delete();
 

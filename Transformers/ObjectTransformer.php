@@ -22,6 +22,7 @@ class ObjectTransformer extends Fractal\TransformerAbstract
             'parent_uid'       => $file->parent_uid,
             'mimeType'         => $file->mimeType,
             'originalFilename' => $file->originalFilename,
+            'fileExtension'    => $file->fileExtension,
             'md5Checksum'      => $file->md5Checksum,
             'fileSize'         => (int)$file->fileSize,
             "path_lower"       => $file->getPath(),
