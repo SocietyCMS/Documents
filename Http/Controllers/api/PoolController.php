@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Modules\Core\Http\Controllers\ApiBaseController;
 use Modules\Documents\Repositories\PoolRepository;
 use Modules\Documents\Transformers\PoolTransformer;
+use Prettus\Validator\Contracts\ValidatorInterface;
 
 
 /**
@@ -20,15 +21,21 @@ class PoolController extends ApiBaseController
      */
     private $repository;
 
+    /**
+     * @var null|\Prettus\Validator\Contracts\ValidatorInterface
+     */
+    private $validator;
+
 
     /**
      * FileController constructor.
-     * @param FileRepository $repository
+     * @param PoolRepository $repository
      */
     public function __construct(PoolRepository $repository)
     {
         parent::__construct();
         $this->repository = $repository;
+        $this->validator = $this->repository->makeValidator();
     }
 
 
@@ -38,13 +45,6 @@ class PoolController extends ApiBaseController
      */
     public function index(Request $request)
     {
-/*
-        $this->repository->create([
-            'title' => 'SocietyCMS',
-            'description' => 'Bloop',
-            'quota' => 1000000,
-        ]);
-*/
         $pools = $this->repository->paginate(15);
 
         return $this->response->paginator($pools, new PoolTransformer());
@@ -57,7 +57,15 @@ class PoolController extends ApiBaseController
      */
     public function store(Request $request)
     {
-        $pool = null;
+        if ($this->validator->with($request->input())->fails(ValidatorInterface::RULE_CREATE)) {
+            throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not create new pool.', $this->validator->errors());
+        }
+
+        $pool = $this->repository->create([
+            'title'       => $request->title,
+            'description' => $request->description,
+            'quota'       => $request->quota,
+        ]);
 
         return $this->response->item($pool, new PoolTransformer());
     }
@@ -70,6 +78,7 @@ class PoolController extends ApiBaseController
     public function get(Request $request, $pool)
     {
         $pool = $this->repository->findByUid($pool);
+
         return $this->response->item($pool, new PoolTransformer());
     }
 
@@ -79,9 +88,19 @@ class PoolController extends ApiBaseController
      */
     public function update(Request $request, $pool)
     {
-        $pool = null;
+        if ($this->validator->with(array_merge($request->input(), ['uid' => $pool]))->fails(ValidatorInterface::RULE_UPDATE)) {
+            throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not create new pool.', $this->validator->errors());
+        }
 
-        return $this->response->item($pool, new PoolTransformer());
+        $pool_id = $this->repository->findByUid($pool)->id;
+        $item = $this->repository->update([
+            'uid'         => $pool,
+            'title'       => $request->title,
+            'description' => $request->description,
+            'quota'       => $request->quota,
+        ], $pool_id);
+
+        return $this->response->item($item, new PoolTransformer());
     }
 
     /**
@@ -95,6 +114,6 @@ class PoolController extends ApiBaseController
 
         $pool->delete();
 
-        return $this->response->successDeleted();
+        return $this->successDeleted();
     }
 }

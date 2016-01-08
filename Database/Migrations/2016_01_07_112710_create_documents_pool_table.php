@@ -17,9 +17,9 @@ class CreateDocumentsPoolTable extends Migration
             $table->string('uid')->index()->unique();
 
             $table->string('title')->index();
-            $table->text('description');
+            $table->text('description')->nullable();
 
-            $table->bigInteger('quota')->unsigned();
+            $table->bigInteger('quota')->unsigned()->nullable();
 
             $table->timestamps();
             $table->softDeletes();
