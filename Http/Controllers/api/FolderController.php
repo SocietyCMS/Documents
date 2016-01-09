@@ -5,9 +5,12 @@ namespace Modules\Documents\Http\Controllers\api;
 use Illuminate\Http\Request;
 use Modules\Core\Http\Controllers\ApiBaseController;
 use Modules\Documents\Repositories\Criterias\ParentCriteria;
+use Modules\Documents\Repositories\Criterias\PoolCriteria;
 use Modules\Documents\Repositories\Criterias\withTrashCriteria;
 use Modules\Documents\Repositories\ObjectRepository;
+use Modules\Documents\Repositories\Validators\FolderValidator;
 use Modules\Documents\Transformers\ObjectTransformer;
+use Prettus\Validator\Contracts\ValidatorInterface;
 
 
 /**
@@ -23,13 +26,20 @@ class FolderController extends ApiBaseController
     private $repository;
 
     /**
+     * @var ObjectRepository
+     */
+    private $validator;
+
+    /**
      * FileController constructor.
      * @param ObjectRepository $repository
      */
-    public function __construct(ObjectRepository $repository)
+    public function __construct(ObjectRepository $repository, Request $request)
     {
         parent::__construct();
         $this->repository = $repository;
+        $this->validator = $this->repository->makeValidator(FolderValidator::class);
+        $this->repository->pushCriteria(new PoolCriteria($request->pool));
     }
 
     /**
@@ -38,16 +48,61 @@ class FolderController extends ApiBaseController
      */
     public function list_folder(Request $request)
     {
-        $meta = [
-            'parent_uid' => $request->input('parent_uid', null),
-            'with_trash' => (bool)$request->input('with_trash', false)
-        ];
-
         $this->repository->pushCriteria(new ParentCriteria($request->input('parent_uid', null)));
         $this->repository->pushCriteria(new withTrashCriteria($request->input('with_trash', false)));
 
-        $files = $this->repository->paginate(15);
+        $objects = $this->repository->paginate(15);
 
-        return $this->response->paginator($files, new ObjectTransformer())->setMeta($meta);
+        $meta = [
+            'parent_uid' => $request->input('parent_uid', null),
+            'with_trash' => (bool)$request->input('with_trash', false),
+            'objects'   => [
+                'total' => $objects->count(),
+                'files' => $objects->where('tag', 'file')->count(),
+                'folders' => $objects->where('tag', 'folder')->count(),
+            ]
+        ];
+
+        return $this->response->paginator($objects, new ObjectTransformer())->setMeta($meta);
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     */
+    public function create_folder(Request $request)
+    {
+        if ($this->validator->with($request->input())->fails(ValidatorInterface::RULE_CREATE)) {
+            throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not create new folder.', $this->validator->errors());
+        }
+
+        $folder = $this->repository->create([
+            'title'       => $request->title,
+            'description' => $request->description,
+            'parent_uid'  => $request->parent_uid,
+            'shared'      => $request->shared,
+            'user_id'     => $this->user()->id,
+            'pool_uid'    => $request->pool,
+        ]);
+
+        $folder = $this->updateComputedProperties($request, $folder);
+
+        return $this->response->item($folder, new ObjectTransformer());
+    }
+
+
+    /**
+     * @param Request $request
+     * @param         $file
+     * @return mixed
+     */
+    private function updateComputedProperties(Request $request, $file)
+    {
+        $file->tag = 'folder';
+        $file->mimeType = 'application/x-directory';
+
+        $file->save();
+
+        return $file;
     }
 }

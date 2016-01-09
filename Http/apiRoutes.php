@@ -18,6 +18,7 @@ $api->version('v1', function ($api) {
 
 
         $api->post('{pool}/list_folder',  ['as' => 'api.documents.list_folder', 'uses'=> 'FolderController@list_folder']);
+        $api->post('{pool}/create_folder',  ['as' => 'api.documents.create_folder', 'uses'=> 'FolderController@create_folder']);
 
         //$api->get('{pool}/file_info', ['as' => 'api.documents.file.index', 'uses'=> 'FileController@index']);
 
@@ -26,6 +27,8 @@ $api->version('v1', function ($api) {
         $api->put('{pool}/update_metadata', ['as' => 'api.documents.file.update', 'uses'=> 'FileController@update']);
         $api->patch('{pool}/update_metadata', ['uses'=> 'FileController@update']);
         $api->delete('{pool}/delete', ['as' => 'api.documents.file.destroy', 'uses'=> 'FileController@destroy']);
+        $api->delete('{pool}/permanently_delete', ['as' => 'api.documents.file.forceDestroy', 'uses'=> 'FileController@forceDestroy']);
+        $api->post('{pool}/restore', ['as' => 'api.documents.file.restore', 'uses'=> 'FileController@restore']);
 
         $api->get('{pool}/download/{file}', ['as' => 'api.documents.file.download', 'uses'=> 'DownloadController@download']);
 

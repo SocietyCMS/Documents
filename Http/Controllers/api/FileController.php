@@ -5,6 +5,7 @@ namespace Modules\Documents\Http\Controllers\api;
 use Illuminate\Http\Request;
 use Modules\Core\Http\Controllers\ApiBaseController;
 use Modules\Documents\Repositories\Criterias\PoolCriteria;
+use Modules\Documents\Repositories\Criterias\withTrashCriteria;
 use Modules\Documents\Repositories\ObjectRepository;
 use Modules\Documents\Repositories\Validators\FileValidator;
 use Modules\Documents\Transformers\ObjectTransformer;
@@ -71,7 +72,6 @@ class FileController extends ApiBaseController
         }
 
         $file = $this->repository->create([
-            'title'       => $request->title,
             'description' => $request->description,
             'parent_uid'  => $request->parent_uid,
             'shared'      => $request->shared,
@@ -92,6 +92,7 @@ class FileController extends ApiBaseController
      */
     public function get(Request $request)
     {
+        $this->repository->pushCriteria(new withTrashCriteria($request->input('with_trash', false)));
         $file = $this->repository->findByUid($request->file);
 
         return $this->response->item($file, new ObjectTransformer());
@@ -124,7 +125,6 @@ class FileController extends ApiBaseController
 
     /**
      * @param Request $request
-     * @param         $file
      * @return mixed
      */
     public function destroy(Request $request)
@@ -138,6 +138,35 @@ class FileController extends ApiBaseController
 
     /**
      * @param Request $request
+     * @return mixed
+     */
+    public function forceDestroy(Request $request)
+    {
+        $this->repository->pushCriteria(new withTrashCriteria($request->input('with_trash', true)));
+        $file = $this->repository->findByUid($request->file);
+
+        $file->forceDelete();
+
+        return $this->successDeleted();
+    }
+
+    /**
+     * @param Request $request
+     * @param         $file
+     * @return mixed
+     */
+    public function restore(Request $request)
+    {
+        $this->repository->pushCriteria(new withTrashCriteria($request->input('with_trash', true)));
+        $file = $this->repository->findByUid($request->file);
+
+        $file->restore();
+
+        return $this->successRestored();
+    }
+
+    /**
+     * @param Request $request
      * @param         $file
      * @return mixed
      */
@@ -145,13 +174,15 @@ class FileController extends ApiBaseController
     {
         if ($request->file('data-binary')) {
 
+            $file->title = $request->title ?: pathinfo($request->file('data-binary')->getClientOriginalName(), PATHINFO_FILENAME);
+
             $file->tag = 'file';
 
             $file->mimeType = $request->file('data-binary')->getMimeType();
 
             $file->originalFilename = $request->file('data-binary')->getClientOriginalName();
             $file->fileSize = $request->file('data-binary')->getSize();
-            $file->fileExtension = $request->file('data-binary')->guessExtension() ?: $request->file('data-binary')->getClientOriginalExtension();
+            $file->fileExtension = $request->file('data-binary')->getClientOriginalExtension();
 
             $file->md5Checksum = md5_file($request->file('data-binary')->getPathname());
 

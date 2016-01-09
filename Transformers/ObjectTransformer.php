@@ -2,6 +2,7 @@
 
 namespace Modules\Documents\Transformers;
 
+use Carbon\Carbon;
 use League\Fractal;
 
 class ObjectTransformer extends Fractal\TransformerAbstract
@@ -24,15 +25,15 @@ class ObjectTransformer extends Fractal\TransformerAbstract
             'originalFilename' => $file->originalFilename,
             'fileExtension'    => $file->fileExtension,
             'md5Checksum'      => $file->md5Checksum,
-            'fileSize'         => (int)$file->fileSize,
+            'fileSize'         =>  (int)$file->fileSize,
             "path_lower"       => $file->getPath(),
             'downloadUrl'      => apiRoute('v1', 'api.documents.file.download', ['pool_id' => $file->pool_uid, 'id' => $file->uid]),
             'shared'           => (bool)$file->shared,
             'owner'            => $file->user_id,
             'deleted'          => (bool)$file->trashed(),
-            'created_at'       => $file->created_at->toRfc3339String(),
-            'updated_at'       => $file->updated_at->toRfc3339String(),
-            'deleted_at'       => isset($file->deleted_at) ? $file->deleted_at->toRfc3339String() : null,
+            'created_at'       => $this->formatDate($file->created_at),
+            'updated_at'       => $this->formatDate($file->updated_at),
+            'deleted_at'       => isset($file->deleted_at) ? $this->formatDate($file->deleted_at): null,
             'pool_uid'         => $file->pool_uid,
         ];
     }
@@ -51,10 +52,19 @@ class ObjectTransformer extends Fractal\TransformerAbstract
             'shared'      => (bool)$file->shared,
             'owner'       => $file->user_id,
             'deleted'     => (bool)$file->trashed(),
-            'created_at'  => $file->created_at->toRfc3339String(),
-            'updated_at'  => $file->updated_at->toRfc3339String(),
-            'deleted_at'  => isset($file->deleted_at) ? $file->deleted_at->toRfc3339String() : null,
+            'created_at'       => $this->formatDate($file->created_at),
+            'updated_at'       => $this->formatDate($file->updated_at),
+            'deleted_at'       => isset($file->deleted_at) ? $this->formatDate($file->deleted_at): null,
             'pool_uid'    => $file->pool_uid,
+        ];
+    }
+
+    protected function formatDate(Carbon $date)
+    {
+        return [
+            'rfc3339' => $date->toRfc3339String(),
+            'timestamp' => $date->getTimestamp(),
+            'diffForHumans' => $date->diffForHumans(),
         ];
     }
 }

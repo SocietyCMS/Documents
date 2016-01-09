@@ -39,20 +39,11 @@
         <div class="four wide column">
 
             <div class="ui fluid vertical pointing menu filepools">
-                <a class="item active">
+                <a class="item" v-for="pool in pools" v-on:click="currentPool = pool.uid"
+                   v-bind:class="{ 'active': currentPool == pool.uid }">
                     <i class="large home middle aligned icon"></i>
-                    <div class="ui blue label">12</div>
-                    SocietyCMS
-                </a>
-                <a class="item">
-                    <i class="large home middle aligned icon"></i>
-                    <div class="ui label">51</div>
-                    Public
-                </a>
-                <a class="item">
-                    <i class="large home middle aligned icon"></i>
-                    <div class="ui label">1</div>
-                    Workspace
+                    <div class="ui label"> @{{ pool.files.count }}</div>
+                    @{{ pool.title }}
                 </a>
             </div>
 
@@ -62,8 +53,11 @@
             <table class="ui sortable selectable table">
                 <thead>
                 <tr>
-                    <th class="therteen wide" colspan="2">
+                    <th class="therteen wide filename">
                         Name
+                    </th>
+                    <th class="one wide no-sort" 6>
+
                     </th>
                     <th class="one wide right aligned">
                         Size
@@ -74,9 +68,11 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td class="selectable">
-                        <a href="#"> <i class="folder icon"></i> node_modules</a>
+                <tr v-for="file in list_folder">
+                    <td class="selectable" data-sort-value="@{{ file.title }}" data-tag="@{{ file.tag }}">
+                        <a href="#"><i v-bind:class="file.mimeType | semanticFileTypeClass"
+                                       class="icon"></i> @{{ file.title }}<span class="ui gray text"
+                                                                                v-if="file.fileExtension">.@{{ file.fileExtension }}</span></a>
                     </td>
                     <td class="collapsing">
                         <button class="circular ui icon button"><i class="share alternate icon"></i></button>
@@ -125,60 +121,21 @@
                         </div>
 
                     </td>
-                    <td class="right aligned collapsing" data-sort-value="70300000">70.3 MB</td>
-                    <td class="right aligned collapsing">10 hours ago</td>
-                </tr>
-                <tr>
-                    <td>
-                        <i class="folder icon"></i> test
-                    </td>
-                    <td class="collapsing">
-                        <button class="circular ui icon button"><i class="share alternate icon"></i></button>
-                        <button class="circular ui icon button"><i class="ellipsis horizontal icon"></i></button>
-                    </td>
-                    <td class="right aligned collapsing" data-sort-value="10200000">10.2 MB</td>
-                    <td class="right aligned">10 hours ago</td>
-                </tr>
-                <tr>
-                    <td>
-                        <i class="folder icon"></i> build
-                    </td>
-                    <td class="collapsing">
-                        <button class="circular ui icon button"><i class="share alternate icon"></i></button>
-                        <button class="circular ui icon button"><i class="ellipsis horizontal icon"></i></button>
-                    </td>
-                    <td class="right aligned collapsing" data-sort-value="709000">709 kB</td>
-                    <td class="right aligned">10 hours ago</td>
-                </tr>
-                <tr>
-                    <td>
-                        <i class="file outline icon"></i> package.json
-                    </td>
-                    <td class="collapsing">
-                        <button class="circular ui icon button"><i class="share alternate icon"></i></button>
-                        <button class="circular ui icon button"><i class="ellipsis horizontal icon"></i></button>
-                    </td>
-                    <td class="right aligned collapsing" data-sort-value="12000">12 kB</td>
-                    <td class="right aligned">10 hours ago</td>
-                </tr>
-                <tr>
-                    <td>
-                        <i class="file outline icon"></i> Gruntfile.js
-                    </td>
-                    <td class="collapsing">
-                        <button class="circular ui icon button"><i class="share alternate icon"></i></button>
-                        <button class="circular ui icon button"><i class="ellipsis horizontal icon"></i></button>
-                    </td>
-                    <td class="right aligned collapsing" data-sort-value="308000">308 kB</td>
-                    <td class="right aligned">10 hours ago</td>
+                    <td class="right aligned collapsing" data-sort-value="@{{ file.fileSize }}"
+                        v-text="file.fileSize | humanReadableFilesize"></td>
+                    <td class="right aligned collapsing"
+                        data-sort-value="@{{ file.created_at.timestamp }}">@{{ file.created_at.diffForHumans }}</td>
                 </tr>
                 </tbody>
                 <tfoot>
-                <tr><th>3 folders and 2 files</th>
+                <tr>
+                    <th><span v-if="folder_meta">@{{ folder_meta.objects.folders }}
+                            folders and @{{ folder_meta.objects.files }} files</span></th>
                     <th></th>
                     <th class="right aligned collapsing">83 MB</th>
                     <th></th>
-                </tr></tfoot>
+                </tr>
+                </tfoot>
             </table>
 
         </div>
@@ -196,5 +153,65 @@
         $('.ui.dropdown')
                 .dropdown();
         $('.ui.sortable.table').tablesort();
+
+
+        $('.ui.sortable.table th.filename').data('sortBy', function (th, td, tablesort) {
+            var tag = $(td).data('tag');
+
+            if (tag == 'folder') {
+                return '0' + $(td).data('sort-value').toLowerCase();
+            }
+            return '1' + $(td).data('sort-value').toLowerCase();
+        });
+
+
+        Vue.filter('humanReadableFilesize', function (size) {
+            if (size) {
+                return filesize(size, {round: 0});
+            }
+            return '';
+        });
+
+        Vue.filter('semanticFileTypeClass', function (mime) {
+            if (semanticFileTypeClassMap[mime]) {
+                return semanticFileTypeClassMap[mime]
+            }
+            return "file outline"
+        });
+
+        var VueInstance = new Vue({
+            el: '#content',
+            data: {
+                currentPool: null,
+                currentFolder: null,
+                pools: null,
+                pool_meta: null,
+                list_folder: null,
+                folder_meta: null
+            },
+            ready: function () {
+
+                this.$http.get('{{apiRoute('v1', 'api.documents.pool.index')}}', function (data, status, request) {
+                    this.$set('pools', data.data);
+                    this.$set('pool_meta', data.meta);
+
+                    this.$set('currentPool', data.data[0].uid);
+                }.bind(this)).error(function (data, status, request) {
+                })
+
+            },
+            watch: {
+                'currentPool': function (val, oldVal) {
+                    var resource = this.$resource('{{apiRoute('v1', 'api.documents.list_folder', ['pool' => ':pool'])}}');
+                    resource.save({pool: this.currentPool}, {parent_uid: this.currentFolder}, function (data, status, request) {
+                        this.list_folder = data.data;
+                        this.folder_meta = data.meta;
+                    }.bind(this)).error(function (data, status, request) {
+                    });
+                }
+            },
+            methods: {}
+
+        });
     </script>
 @endsection
