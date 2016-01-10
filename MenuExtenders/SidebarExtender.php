@@ -31,25 +31,16 @@ class SidebarExtender implements \Maatwebsite\Sidebar\SidebarExtender
      */
     public function extendWith(Menu $menu)
     {
-        $menu->group(trans('documents::documents.title.documents'), function (Group $group) {
-            $group->weight(20);
+        $menu->group(trans('core::sidebar.collaboration'), function (Group $group) {
+            $group->weight(10);
 
-            $group->item('Public', function (Item $item) {
-
-                $item->route('backend::documents.documents.index');
-                $item->authorize(
-                    $this->auth->hasAccess('documents.documents.index')
-                );
-            });
-
-            $group->item('SocietyCMS', function (Item $item) {
+            $group->item(trans('documents::documents.title.documents'), function (Item $item) {
 
                 $item->route('backend::documents.documents.index');
                 $item->authorize(
                     $this->auth->hasAccess('documents.documents.index')
                 );
             });
-
 
         });
 
