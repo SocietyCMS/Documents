@@ -22,7 +22,7 @@ class ParentCriteria implements CriteriaInterface
      */
     public function __construct($parent_uid)
     {
-        $this->parent_uid = $parent_uid;
+        $this->parent_uid = empty($parent_uid)?null:$parent_uid;
     }
 
 

@@ -61,9 +61,20 @@ class Object extends Model
     public function getPath()
     {
         if ($this->parent == null) {
-            return '/'.$this->getObjectName();
+            return $this->getObjectName();
         }
         return $this->parent->getPath().'/'.$this->getObjectName();
+    }
+
+    /**
+     * Get the pool that this object belongs to.
+     */
+    public function getPathUid()
+    {
+        if ($this->parent == null) {
+            return $this->uid;
+        }
+        return $this->parent->getPathUid().':'.$this->uid;
     }
 
     /**

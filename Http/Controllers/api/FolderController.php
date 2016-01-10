@@ -48,6 +48,9 @@ class FolderController extends ApiBaseController
      */
     public function list_folder(Request $request)
     {
+        $currentPath = $this->getCurrentPath($request);
+        $currentPathUid = $this->getCurrentPathUid($request);
+
         $this->repository->pushCriteria(new ParentCriteria($request->input('parent_uid', null)));
         $this->repository->pushCriteria(new withTrashCriteria($request->input('with_trash', false)));
 
@@ -60,7 +63,9 @@ class FolderController extends ApiBaseController
                 'total' => $objects->count(),
                 'files' => $objects->where('tag', 'file')->count(),
                 'folders' => $objects->where('tag', 'folder')->count(),
-            ]
+            ],
+            'currentPath' => $currentPath,
+            'currentPathUid' => $currentPathUid
         ];
 
         return $this->response->paginator($objects, new ObjectTransformer())->setMeta($meta);
@@ -104,5 +109,33 @@ class FolderController extends ApiBaseController
         $file->save();
 
         return $file;
+    }
+
+    /**
+     * @param Request $request
+     * @return null
+     */
+    private function getCurrentPath(Request $request)
+    {
+        $parent_uid = empty($request->input('parent_uid')) ? null : $request->input('parent_uid');
+        if (!is_null($parent_uid)) {
+            return $this->repository->findByUid($parent_uid)->getPath();
+
+        }
+        return null;
+    }
+
+    /**
+     * @param Request $request
+     * @return null
+     */
+    private function getCurrentPathUid(Request $request)
+    {
+        $parent_uid = empty($request->input('parent_uid')) ? null : $request->input('parent_uid');
+        if (!is_null($parent_uid)) {
+            return $this->repository->findByUid($parent_uid)->getPathUid();
+
+        }
+        return null;
     }
 }

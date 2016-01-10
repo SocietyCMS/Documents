@@ -17,7 +17,7 @@ $api->version('v1', function ($api) {
         $api->delete('pool/{pool}', ['as' => 'api.documents.pool.destroy', 'uses'=> 'PoolController@destroy']);
 
 
-        $api->post('{pool}/list_folder',  ['as' => 'api.documents.list_folder', 'uses'=> 'FolderController@list_folder']);
+        $api->get('{pool}/list_folder',  ['as' => 'api.documents.list_folder', 'uses'=> 'FolderController@list_folder']);
         $api->post('{pool}/create_folder',  ['as' => 'api.documents.create_folder', 'uses'=> 'FolderController@create_folder']);
 
         //$api->get('{pool}/file_info', ['as' => 'api.documents.file.index', 'uses'=> 'FileController@index']);

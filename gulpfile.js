@@ -27,8 +27,19 @@ elixir.extend("PublishModules", function () {
  */
 
 elixir(function (mix) {
+    /**
+     * Compile less
+     **/
     mix.less(moduleInfo.name + ".less");
 
+    /**
+     * Concat scripts
+     **/
+    mix.browserify("app.js");
+
+    /**
+     * Copy images
+     */
     mix.copy('Resources/assets/images', 'Assets/images');
 
     mix.PublishModules();
