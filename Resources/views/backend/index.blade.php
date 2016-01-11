@@ -15,9 +15,10 @@
             @{{ currentPool.title }}
         </a>
 
-        <template v-for="item in currentPath">
+        <template v-for="item in containing_ns_path">
             <i class="right angle icon divider"></i>
-            <a class="section" v-on:click="breadcrumbClick(item.uid)">@{{ item.title }}</a>
+            <a class="ui section text" v-on:click="breadcrumbClick(item.uid)"
+               v-bind:class="{ 'black': currentFolder == item.uid }">@{{ item.title }}</a>
         </template>
 
         <i class="right angle icon divider"></i>
@@ -37,19 +38,21 @@
 
 
     <div class="ui grid">
-        <div class="four wide column">
+        <div class="four wide column" v-if="pools.length > 1">
 
             <div class="ui fluid vertical pointing menu filepools">
+
                 <a class="item" v-for="pool in pools" v-on:click="poolClick(pool);"
                    v-bind:class="{ 'active': currentPool.uid == pool.uid }">
                     <i class="large home middle aligned icon"></i>
+
                     <div class="ui label"> @{{ pool.files.count }}</div>
                     @{{ pool.title }}
                 </a>
             </div>
 
         </div>
-        <div class="twelve wide column">
+        <div v-bind:class="{ 'twelve': pools.length > 1, 'wide': pools.length > 1, 'column': pools.length > 1, 'column': pools.length = 1}">
 
             <table class="ui sortable selectable table">
                 <thead>
@@ -57,8 +60,7 @@
                     <th class="therteen wide filename">
                         Name
                     </th>
-                    <th class="one wide no-sort" 6>
-
+                    <th class="one wide no-sort">
                     </th>
                     <th class="one wide right aligned">
                         Size
@@ -71,7 +73,7 @@
                 <tbody>
                 <tr v-for="object in list_folder">
                     <td class="selectable" data-sort-value="@{{ object.title }}" data-tag="@{{ object.tag }}">
-                        <a href="#" v-on:click="objectClick(object)"><i
+                        <a href="#" v-on:click="objectClick(object, $event)"><i
                                     v-bind:class="object.mimeType | semanticFileTypeClass"
                                     class="icon"></i> @{{ object.title }}<span class="ui gray text"
                                                                                v-if="object.fileExtension">.@{{ object.fileExtension }}</span></a>
@@ -170,6 +172,7 @@
                 return '1' + $(td).data('sort-value').toLowerCase();
             });
 
+            $('.ui.sortable.table').tablesort().data('tablesort').sort($(".ui.sortable.table th.filename"));
         }
 
         var VueInstance = new Vue({
@@ -177,7 +180,7 @@
             data: {
                 currentPool: null,
                 currentFolder: null,
-                pools: null,
+                pools: {},
                 pool_meta: null,
                 list_folder: null,
                 folder_meta: null
@@ -189,9 +192,10 @@
                     this.$set('pool_meta', data.meta);
 
                     this.$set('currentPool', data.data[0]);
-                    this.listFolder()
+                    this.setFromURL();
                 }.bind(this)).error(function (data, status, request) {
                 })
+
 
             },
             watch: {
@@ -200,21 +204,21 @@
                 }
             },
             computed: {
-                currentPath: function () {
+                containing_ns_path: function () {
                     if (
                             this.currentFolder &&
                             this.folder_meta &&
-                            this.folder_meta.currentPath &&
-                            this.folder_meta.currentPathUid
+                            this.folder_meta.containing_ns_path &&
+                            this.folder_meta.containing_fq_uid
 
                     ) {
 
-                        currentPath =  this.folder_meta.currentPath.split('/');
-                        currentPathUid = this.folder_meta.currentPathUid.split(':');
+                        currentPath = this.folder_meta.containing_ns_path.split('/');
+                        currentPathUid = this.folder_meta.containing_fq_uid.split(':');
 
                         returnObject = [];
 
-                        currentPath.forEach(function(element, index, array) {
+                        currentPath.forEach(function (element, index, array) {
                             returnObject.push({
                                 'uid': currentPathUid[index],
                                 'title': element
@@ -236,14 +240,38 @@
                     }
                     return this.currentFolder = null
                 },
-                objectClick: function (object) {
+                objectClick: function (object, event) {
+                    event.preventDefault()
                     if (object.tag == 'folder') {
                         return this.currentFolder = object.uid
                     }
-                    return console.log('file');
+
+                    return console.log(object.downloadUrl);
                 },
                 breadcrumbClick: function (uid) {
                     return this.currentFolder = uid
+                },
+                setFromURL: function () {
+                    var path = window.location.hash,
+                            currentPathUid = null;
+
+                    path = path.replace(/\/$/, "");
+                    path = path.replace('#', '');
+                    path = decodeURIComponent(path);
+
+                    currentPathUid = path.split(':');
+
+                    var result = $.grep(this.pools, function (e) {
+                        return e.uid == currentPathUid[0];
+                    });
+
+                    if (result.length == 1) {
+                        this.currentPool = result[0];
+                        this.currentFolder = currentPathUid[1];
+                    } else {
+                        this.listFolder()
+                    }
+
                 },
                 listFolder: function () {
                     var resource = this.$resource('{{apiRoute('v1', 'api.documents.list_folder', ['pool' => ':pool'])}}');
@@ -251,7 +279,7 @@
                         this.list_folder = data.data;
                         this.folder_meta = data.meta;
 
-                        window.location.hash = this.folder_meta.currentPathUid;
+                        window.location.hash = this.currentPool.uid + ':' + this.folder_meta.parent_uid;
 
                         this.$nextTick(function () {
                             initializeComponents()

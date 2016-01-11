@@ -48,8 +48,7 @@ class FolderController extends ApiBaseController
      */
     public function list_folder(Request $request)
     {
-        $currentPath = $this->getCurrentPath($request);
-        $currentPathUid = $this->getCurrentPathUid($request);
+        $parent = $this->getParent($request);
 
         $this->repository->pushCriteria(new ParentCriteria($request->input('parent_uid', null)));
         $this->repository->pushCriteria(new withTrashCriteria($request->input('with_trash', false)));
@@ -64,8 +63,10 @@ class FolderController extends ApiBaseController
                 'files' => $objects->where('tag', 'file')->count(),
                 'folders' => $objects->where('tag', 'folder')->count(),
             ],
-            'currentPath' => $currentPath,
-            'currentPathUid' => $currentPathUid
+
+            'containing_fq_path' => $parent?$parent->getFQPath():'',
+            'containing_fq_uid' => $parent?$parent->getFQUid():'',
+            'containing_ns_path' => $parent?$parent->getNSPath():'',
         ];
 
         return $this->response->paginator($objects, new ObjectTransformer())->setMeta($meta);
@@ -115,25 +116,11 @@ class FolderController extends ApiBaseController
      * @param Request $request
      * @return null
      */
-    private function getCurrentPath(Request $request)
+    private function getParent(Request $request)
     {
         $parent_uid = empty($request->input('parent_uid')) ? null : $request->input('parent_uid');
         if (!is_null($parent_uid)) {
-            return $this->repository->findByUid($parent_uid)->getPath();
-
-        }
-        return null;
-    }
-
-    /**
-     * @param Request $request
-     * @return null
-     */
-    private function getCurrentPathUid(Request $request)
-    {
-        $parent_uid = empty($request->input('parent_uid')) ? null : $request->input('parent_uid');
-        if (!is_null($parent_uid)) {
-            return $this->repository->findByUid($parent_uid)->getPathUid();
+            return $this->repository->findByUid($parent_uid);
 
         }
         return null;

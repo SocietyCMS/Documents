@@ -58,23 +58,34 @@ class Object extends Model
     /**
      * Get the pool that this object belongs to.
      */
-    public function getPath()
+    public function getFQPath()
     {
         if ($this->parent == null) {
             return $this->getObjectName();
         }
-        return $this->parent->getPath().'/'.$this->getObjectName();
+        return $this->parent->getFQPath().'/'.$this->getObjectName();
     }
 
     /**
      * Get the pool that this object belongs to.
      */
-    public function getPathUid()
+    public function getNSPath()
+    {
+        if ($this->parent == null) {
+            return $this->title;
+        }
+        return $this->parent->getNSPath().'/'.$this->title;
+    }
+
+    /**
+     * Get the pool that this object belongs to.
+     */
+    public function getFQUid()
     {
         if ($this->parent == null) {
             return $this->uid;
         }
-        return $this->parent->getPathUid().':'.$this->uid;
+        return $this->parent->getFQUid().':'.$this->uid;
     }
 
     /**
@@ -88,6 +99,7 @@ class Object extends Model
 
         return Str::slug($this->title);
     }
+
 
     /**
      * Get the parent of this object.

@@ -15,21 +15,6 @@ Vue.filter('semanticFileTypeClass', function (mime) {
     return "file outline";
 });
 
-function initializeComponents() {
-
-    $('.ui.dropdown').dropdown();
-    $('.ui.sortable.table').tablesort();
-
-    $('.ui.sortable.table th.filename').data('sortBy', function (th, td, tablesort) {
-        var tag = $(td).data('tag');
-
-        if (tag == 'folder') {
-            return '0' + $(td).data('sort-value').toLowerCase();
-        }
-        return '1' + $(td).data('sort-value').toLowerCase();
-    });
-}
-
 },{}]},{},[1]);
 
 //# sourceMappingURL=app.js.map
