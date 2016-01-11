@@ -23,12 +23,14 @@
 
         <i class="right angle icon divider"></i>
 
-        <div class="ui icon top left pointing dropdown button">
+        <div class="ui icon top left pointing dropdown button" v-bind:class="{'active':editMode == 'createFolder'}">
             <i class="plus icon"></i>
 
             <div class="menu">
                 <div class="item">Upload</div>
-                <div class="item">Folder</div>
+                <div class="item" v-on:click="createFolder(object, $event)">
+                    <div class="ui text">Folder</div>
+                </div>
             </div>
         </div>
 
@@ -73,17 +75,30 @@
                 </thead>
                 <tbody>
 
+                <tr class="object" v-if="editMode == 'createFolder'">
+                    <td >
+                        <div class="ui input">
+                            <input type="text"  id="createFolderInput"
+                                   v-model="editObject.title" v-on:blur="folderBlurCreate(editObject, $event)"
+                                   v-on:keydown="folderKeydownCreate(editObject, $event)">
+                        </div>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
                 <tr class="object" v-for="object in list_folder">
                     <td class="selectable" data-sort-value="@{{ object.title }}" data-tag="@{{ object.tag }}">
-                        <a href="#" class="title" v-bind:class="{'edit': editObject == object}"
-                           v-on:click="objectClick(object, $event)"><i
+                        <a href="#"
+                           v-on:click="objectOpen(object, $event)"><i
                                     v-bind:class="object.mimeType | semanticFileTypeClass"
                                     class="icon"></i>
 
-                            <div class="ui text">@{{ object.title }} <span class="ui gray text"
+                            <div class="ui text" v-if="editObject != object">@{{ object.title }} <span class="ui gray text"
                                                                            v-if="object.fileExtension">.@{{ object.fileExtension }}</span>
                             </div>
-                            <div class="ui fluid input">
+                            <div class="ui input" v-else>
                                 <input type="text" v-model="object.title" v-on:blur="objectBlurEdit(object, $event)"
                                        v-on:keydown="objectKeydownEdit(object, $event)">
                             </div>
@@ -97,13 +112,9 @@
                             <button class="circular ui icon button"><i class="ellipsis horizontal icon"></i></button>
 
                             <div class="menu">
-                                <div class="item">
+                                <div class="item" v-on:click="objectOpen(object, $event)">
                                     <span class="description">ctrl + o</span>
                                     Open...
-                                </div>
-                                <div class="item">
-                                    <span class="description">ctrl + s</span>
-                                    Save as...
                                 </div>
                                 <div class="item" v-on:click="objectEdit(object, $event)">
                                     <span class="description">ctrl + r</span>
@@ -120,19 +131,6 @@
                                 </div>
                                 <div class="divider"></div>
                                 <div class="item">Download As...</div>
-                                <div class="item">
-                                    <i class="dropdown icon"></i>
-                                    Publish To Web
-                                    <div class="menu">
-                                        <div class="item">Google Docs</div>
-                                        <div class="item">Google Drive</div>
-                                        <div class="item">Dropbox</div>
-                                        <div class="item">Adobe Creative Cloud</div>
-                                        <div class="item">Private FTP</div>
-                                        <div class="item">Another Service...</div>
-                                    </div>
-                                </div>
-                                <div class="item">E-mail Collaborators</div>
                             </div>
                         </div>
 
@@ -142,6 +140,15 @@
                     <td class="right aligned collapsing"
                         data-sort-value="@{{ object.created_at.timestamp }}">@{{ object.created_at.diffForHumans }}</td>
                 </tr>
+
+                <tr v-if="!list_folder">
+                    <td colspan="4">
+                        <div class="ui active inverted dimmer">
+                            <div class="ui medium text loader">Loading</div>
+                        </div>
+                    </td>
+                </tr>
+
                 </tbody>
                 <tfoot>
                 <tr>
@@ -156,7 +163,6 @@
 
         </div>
     </div>
-
 @endsection
 
 @section('styles')
@@ -169,11 +175,10 @@
     <script>
 
         function initializeComponents() {
+            $('.ui.sortable.table').tablesort();
 
             $('.ui.dropdown')
                     .dropdown();
-            $('.ui.sortable.table').tablesort();
-
 
             $('.ui.sortable.table th.filename').data('sortBy', function (th, td, tablesort) {
                 var tag = $(td).data('tag');
@@ -208,6 +213,7 @@
                     this.$set('currentPool', data.data[0]);
                     this.setFromURL();
                 }.bind(this)).error(function (data, status, request) {
+                    toastr.error(data.message, 'Error: '+status);
                 })
 
 
@@ -254,7 +260,7 @@
                     }
                     return this.currentFolder = null
                 },
-                objectClick: function (object, event) {
+                objectOpen: function (object, event) {
                     event.preventDefault()
 
                     if (this.editObject == object) {
@@ -292,6 +298,9 @@
 
                 },
                 listFolder: function () {
+                    this.editMode = null;
+                    this.editObject = null;
+
                     var resource = this.$resource('{{apiRoute('v1', 'api.documents.list_folder', ['pool' => ':pool'])}}');
                     resource.get({pool: this.currentPool.uid}, {parent_uid: this.currentFolder}, function (data, status, request) {
                         this.list_folder = data.data;
@@ -304,6 +313,8 @@
                         })
 
                     }.bind(this)).error(function (data, status, request) {
+                        toastr.error(data.message, 'Error: '+status);
+                        this.currentFolder = null
                     });
                 },
                 objectEdit: function (object, event) {
@@ -320,22 +331,60 @@
                 objectBlurEdit: function (object, event) {
                     event.preventDefault();
 
-                    if(this.editObject== null){ return;}
+                    if(this.editObject== null  || this.editMode != 'rename'){ return;}
 
                     var resource = this.$resource('{{apiRoute('v1', 'api.documents.file.update', ['pool' => ':pool'])}}');
                     resource.update({pool: this.currentPool.uid}, this.editObject, function (data, status, request) {
-
+                        this.editMode = null;
+                        this.editObject = null;
                     }.bind(this)).error(function (data, status, request) {
+                        toastr.error(data.message, 'Error: '+status);
                     });
 
-                    this.editObject = null;
-                    this.editMode = null;
+
+
                 },
                 objectKeydownEdit: function (object, event) {
                     if (event.which == 13) {
                         this.objectBlurEdit(object, event);
                     }
-                }
+                },
+
+
+                createFolder: function(object, event) {
+                    event.preventDefault();
+                    this.editObject = {
+                        mimeType: "application/x-directory",
+                        parent_uid: this.currentFolder,
+                        pool_uid: this.currentPool.uid,
+                        title: ""
+                    };
+                    this.editMode = 'createFolder';
+
+                    setTimeout(function () {
+                                $('#createFolderInput').focus()
+                            }
+                            , 100);
+                },
+                folderBlurCreate: function (object, event) {
+                    event.preventDefault();
+
+                    if(this.editObject == null || this.editMode != 'createFolder'){ return;}
+
+                    var resource = this.$resource('{{apiRoute('v1', 'api.documents.create_folder', ['pool' => ':pool'])}}');
+                    resource.save({pool: this.currentPool.uid}, this.editObject, function (data, status, request) {
+                        this.listFolder();
+                        this.currentPool.files.count++
+                    }.bind(this)).error(function (data, status, request) {
+                        toastr.error(data.errors[0], data.message);
+                    });
+
+                },
+                folderKeydownCreate: function (object, event) {
+                    if (event.which == 13) {
+                        this.folderBlurCreate(object, event);
+                    }
+                },
 
 
             }

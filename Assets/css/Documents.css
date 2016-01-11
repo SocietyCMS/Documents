@@ -10,22 +10,13 @@
   margin: inherit;
   padding-right: .28571429em;
 }
-.object .title .text {
+.object .ui.text {
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
   display: inline-flex;
 }
-.object .title .input {
-  display: none;
-}
-.object .title.edit .input {
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
+.object .ui.input {
   min-width: 50%;
-}
-.object .title.edit .text {
-  display: none;
 }
 
 /*# sourceMappingURL=Documents.css.map */
