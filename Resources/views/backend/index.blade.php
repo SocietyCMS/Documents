@@ -71,6 +71,30 @@
                 </tr>
                 </thead>
                 <tbody>
+
+                <tr>
+                    <td class="selectable" data-sort-value="Projects" data-tag="folder">
+                        <a href="#"><i class="icon folder"></i>
+                            <div class="display">Project</div>
+                            <div class="ui input edit">
+                                <input type="text">
+                            </div></a>
+
+                    </td>
+                    <td class="collapsing">
+
+                    </td>
+                    <td class="right aligned collapsing"></td>
+                    <td class="right aligned collapsing"></td>
+                </tr>
+
+
+
+
+
+
+
+
                 <tr v-for="object in list_folder">
                     <td class="selectable" data-sort-value="@{{ object.title }}" data-tag="@{{ object.tag }}">
                         <a href="#" v-on:click="objectClick(object, $event)"><i
