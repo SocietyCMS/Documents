@@ -93,7 +93,7 @@ class FileController extends ApiBaseController
     public function get(Request $request)
     {
         $this->repository->pushCriteria(new withTrashCriteria($request->input('with_trash', false)));
-        $file = $this->repository->findByUid($request->file);
+        $file = $this->repository->findByUid($request->uid);
 
         return $this->response->item($file, new ObjectTransformer());
     }
@@ -104,11 +104,11 @@ class FileController extends ApiBaseController
      */
     public function update(Request $request)
     {
-        if ($this->validator->with(array_merge($request->input(), ['uid' => $request->file]))->fails(ValidatorInterface::RULE_UPDATE)) {
+        if ($this->validator->with(array_merge($request->input(), ['uid' => $request->uid]))->fails(ValidatorInterface::RULE_UPDATE)) {
             throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not update file.', $this->validator->errors());
         }
 
-        $file_id = $this->repository->findByUid($request->file)->id;
+        $file_id = $this->repository->findByUid($request->uid)->id;
         $file = $this->repository->update([
             'title'       => $request->title,
             'description' => $request->description,
@@ -129,7 +129,7 @@ class FileController extends ApiBaseController
      */
     public function destroy(Request $request)
     {
-        $file = $this->repository->findByUid($request->file);
+        $file = $this->repository->findByUid($request->uid);
 
         $file->delete();
 
@@ -143,7 +143,7 @@ class FileController extends ApiBaseController
     public function forceDestroy(Request $request)
     {
         $this->repository->pushCriteria(new withTrashCriteria($request->input('with_trash', true)));
-        $file = $this->repository->findByUid($request->file);
+        $file = $this->repository->findByUid($request->uid);
 
         $file->forceDelete();
 
@@ -158,7 +158,7 @@ class FileController extends ApiBaseController
     public function restore(Request $request)
     {
         $this->repository->pushCriteria(new withTrashCriteria($request->input('with_trash', true)));
-        $file = $this->repository->findByUid($request->file);
+        $file = $this->repository->findByUid($request->uid);
 
         $file->restore();
 

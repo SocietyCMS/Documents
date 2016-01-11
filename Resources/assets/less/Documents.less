@@ -20,3 +20,19 @@
 }
 
 
+.object .title {
+  .text {
+    display: inline-flex;
+  }
+  .input {
+    display: none;
+  }
+
+  &.edit .input {
+    display: inline-flex;
+    min-width: 50%;
+  }
+  &.edit .text {
+    display: none;
+  }
+}

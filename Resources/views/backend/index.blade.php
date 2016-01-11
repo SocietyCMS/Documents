@@ -46,7 +46,8 @@
                    v-bind:class="{ 'active': currentPool.uid == pool.uid }">
                     <i class="large home middle aligned icon"></i>
 
-                    <div class="ui label"> @{{ pool.files.count }}</div>
+                    <div class="ui label"
+                         v-bind:class="{ 'blue': currentPool.uid == pool.uid }"> @{{ pool.files.count }}</div>
                     @{{ pool.title }}
                 </a>
             </div>
@@ -72,35 +73,22 @@
                 </thead>
                 <tbody>
 
-                <tr>
-                    <td class="selectable" data-sort-value="Projects" data-tag="folder">
-                        <a href="#"><i class="icon folder"></i>
-                            <div class="display">Project</div>
-                            <div class="ui input edit">
-                                <input type="text">
-                            </div></a>
-
-                    </td>
-                    <td class="collapsing">
-
-                    </td>
-                    <td class="right aligned collapsing"></td>
-                    <td class="right aligned collapsing"></td>
-                </tr>
-
-
-
-
-
-
-
-
-                <tr v-for="object in list_folder">
+                <tr class="object" v-for="object in list_folder">
                     <td class="selectable" data-sort-value="@{{ object.title }}" data-tag="@{{ object.tag }}">
-                        <a href="#" v-on:click="objectClick(object, $event)"><i
+                        <a href="#" class="title" v-bind:class="{'edit': editObject == object}"
+                           v-on:click="objectClick(object, $event)"><i
                                     v-bind:class="object.mimeType | semanticFileTypeClass"
-                                    class="icon"></i> @{{ object.title }}<span class="ui gray text"
-                                                                               v-if="object.fileExtension">.@{{ object.fileExtension }}</span></a>
+                                    class="icon"></i>
+
+                            <div class="ui text">@{{ object.title }} <span class="ui gray text"
+                                                                           v-if="object.fileExtension">.@{{ object.fileExtension }}</span>
+                            </div>
+                            <div class="ui fluid input">
+                                <input type="text" v-model="object.title" v-on:blur="objectBlurEdit(object, $event)"
+                                       v-on:keydown="objectKeydownEdit(object, $event)">
+                            </div>
+
+                        </a>
                     </td>
                     <td class="collapsing">
                         <button class="circular ui icon button"><i class="share alternate icon"></i></button>
@@ -117,7 +105,7 @@
                                     <span class="description">ctrl + s</span>
                                     Save as...
                                 </div>
-                                <div class="item">
+                                <div class="item" v-on:click="objectEdit(object, $event)">
                                     <span class="description">ctrl + r</span>
                                     Rename
                                 </div>
@@ -207,7 +195,9 @@
                 pools: {},
                 pool_meta: null,
                 list_folder: null,
-                folder_meta: null
+                folder_meta: null,
+                editObject: null,
+                editMode: null
             },
             ready: function () {
 
@@ -266,6 +256,10 @@
                 },
                 objectClick: function (object, event) {
                     event.preventDefault()
+
+                    if (this.editObject == object) {
+                        return;
+                    }
                     if (object.tag == 'folder') {
                         return this.currentFolder = object.uid
                     }
@@ -311,7 +305,38 @@
 
                     }.bind(this)).error(function (data, status, request) {
                     });
+                },
+                objectEdit: function (object, event) {
+                    event.preventDefault();
+
+                    this.editObject = object;
+                    this.editMode = 'rename';
+
+                    setTimeout(function () {
+                                $('.object .title.edit .input input').focus()
+                            }
+                            , 50);
+                },
+                objectBlurEdit: function (object, event) {
+                    event.preventDefault();
+
+                    if(this.editObject== null){ return;}
+
+                    var resource = this.$resource('{{apiRoute('v1', 'api.documents.file.update', ['pool' => ':pool'])}}');
+                    resource.update({pool: this.currentPool.uid}, this.editObject, function (data, status, request) {
+
+                    }.bind(this)).error(function (data, status, request) {
+                    });
+
+                    this.editObject = null;
+                    this.editMode = null;
+                },
+                objectKeydownEdit: function (object, event) {
+                    if (event.which == 13) {
+                        this.objectBlurEdit(object, event);
+                    }
                 }
+
 
             }
 
