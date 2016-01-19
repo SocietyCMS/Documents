@@ -45,9 +45,27 @@ class PoolController extends ApiBaseController
      */
     public function index(Request $request)
     {
-        $pools = $this->repository->paginate(15);
+        /*
+        foreach ($this->repository->all() as $item) {
+            $permissionManager = new \Modules\Core\Permissions\PermissionManager();
+            $permissionManager->registerPermission(
+                "documents::pool-{$item->uid}",
+                $item->title,
+                $item->description,
+                "documents"
+            );
+        }
+        */
 
-        return $this->response->paginator($pools, new PoolTransformer());
+        $pools = collect();
+        foreach ($this->repository->all() as $item) {
+            if($this->auth->user()->can("documents::pool-{$item->uid}"))
+            {
+                $pools->push($item);
+            }
+        }
+
+        return $this->response->collection($pools, new PoolTransformer());
     }
 
 
