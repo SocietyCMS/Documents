@@ -57,7 +57,7 @@
         </div>
         <div v-bind:class="{ 'twelve': pools.length > 1, 'wide': pools.length > 1, 'column': pools.length > 1, 'column': pools.length = 1}">
 
-            <table class="ui sortable selectable table">
+            <table class="ui sortable selectable table" >
                 <thead>
                 <tr>
                     <th class="therteen wide filename">
@@ -140,15 +140,6 @@
                     <td class="right aligned collapsing"
                         data-sort-value="@{{ object.created_at.timestamp }}">@{{ object.created_at.diffForHumans }}</td>
                 </tr>
-
-                <tr v-if="!list_folder">
-                    <td colspan="4">
-                        <div class="ui active inverted dimmer">
-                            <div class="ui medium text loader">Loading</div>
-                        </div>
-                    </td>
-                </tr>
-
                 </tbody>
                 <tfoot>
                 <tr>
@@ -160,6 +151,10 @@
                 </tr>
                 </tfoot>
             </table>
+
+            <div class="ui active inverted dimmer" v-if="!list_folder && typeof currentPool != 'undefined'">
+                <div class="ui medium text loader">Loading</div>
+            </div>
 
         </div>
     </div>
@@ -197,8 +192,7 @@
             data: {
                 currentPool: null,
                 currentFolder: null,
-                pools: {},
-                pool_meta: null,
+                pools: [],
                 list_folder: null,
                 folder_meta: null,
                 editObject: null,
@@ -206,16 +200,15 @@
             },
             ready: function () {
 
-                this.$http.get('{{apiRoute('v1', 'api.documents.pool.index')}}', function (data, status, request) {
-                    this.$set('pools', data.data);
-                    this.$set('pool_meta', data.meta);
-
-                    this.$set('currentPool', data.data[0]);
+                var resource = this.$resource('{{apiRoute('v1', 'api.documents.pool.index')}}');
+                // save item
+                resource.get({}).then(function (response) {
+                    this.pools= response.data.data;
+                    this.currentPool = response.data.data[0];
                     this.setFromURL();
-                }.bind(this)).error(function (data, status, request) {
-                    toastr.error(data.message, 'Error: '+status);
-                })
-
+                }.bind(this), function (response) {
+                    toastr.error(response.data.message, 'Error: '+response.data.status_code);
+                }.bind(this));
 
             },
             watch: {
@@ -300,6 +293,11 @@
                 listFolder: function () {
                     this.editMode = null;
                     this.editObject = null;
+
+                    if(!this.currentPool)
+                    {
+                        return;
+                    }
 
                     var resource = this.$resource('{{apiRoute('v1', 'api.documents.list_folder', ['pool' => ':pool'])}}');
                     resource.get({pool: this.currentPool.uid}, {parent_uid: this.currentFolder}, function (data, status, request) {

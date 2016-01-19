@@ -40,6 +40,9 @@ class FolderController extends ApiBaseController
         $this->repository = $repository;
         $this->validator = $this->repository->makeValidator(FolderValidator::class);
         $this->repository->pushCriteria(new PoolCriteria($request->pool));
+
+        $this->middleware("permission:documents::pool-{$request->pool}-read", ['only' => ['list_folder']]);
+        $this->middleware("permission:documents::pool-{$request->pool}-write", ['only' => ['create_folder']]);
     }
 
     /**

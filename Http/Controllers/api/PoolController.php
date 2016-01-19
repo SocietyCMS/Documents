@@ -45,21 +45,27 @@ class PoolController extends ApiBaseController
      */
     public function index(Request $request)
     {
-        /*
         foreach ($this->repository->all() as $item) {
             $permissionManager = new \Modules\Core\Permissions\PermissionManager();
             $permissionManager->registerPermission(
-                "documents::pool-{$item->uid}",
+                "documents::pool-{$item->uid}-read",
+                $item->title,
+                $item->description,
+                "documents"
+            );
+
+            $permissionManager->registerPermission(
+                "documents::pool-{$item->uid}-write",
                 $item->title,
                 $item->description,
                 "documents"
             );
         }
-        */
+
 
         $pools = collect();
         foreach ($this->repository->all() as $item) {
-            if($this->auth->user()->can("documents::pool-{$item->uid}"))
+            if($this->auth->user()->can(["documents::pool-{$item->uid}-read", "documents::pool-{$item->uid}-write"]))
             {
                 $pools->push($item);
             }
