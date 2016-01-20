@@ -49,11 +49,6 @@ class DownloadController extends ApiBaseController
         $file = $this->repository->findByUid($request->file);
         $contents = Storage::disk('local')->get( 'documents/'.$file->uid);
 
-        $headers = [
-            "Content-Type" =>$file->mimeType,
-            "Content-Length" => $file->fileSize
-        ];
-
         return (new Response($contents, 200))
             ->header('Content-Type', $file->mimeType)
             ->header('Content-Length', $file->fileSize)
