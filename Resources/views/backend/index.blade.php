@@ -27,7 +27,7 @@
             <i class="plus icon"></i>
 
             <div class="menu">
-                <div class="item">Upload</div>
+                <a class="item" id="uploadFileButton">Upload</a>
                 <div class="item" v-on:click="createFolder(object, $event)">
                     <div class="ui text">Folder</div>
                 </div>
@@ -57,7 +57,7 @@
         </div>
         <div v-bind:class="{ 'twelve': pools.length > 1, 'wide': pools.length > 1, 'column': pools.length > 1, 'column': pools.length = 1}">
 
-            <table class="ui sortable selectable table" >
+            <table class="ui sortable selectable table" id="file-list-table">
                 <thead>
                 <tr>
                     <th class="therteen wide filename">
@@ -81,6 +81,20 @@
                             <input type="text"  id="createFolderInput"
                                    v-model="editObject.title" v-on:blur="folderBlurCreate(editObject, $event)"
                                    v-on:keydown="folderKeydownCreate(editObject, $event)">
+                        </div>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+                <tr class="object" v-if="editMode == 'uploadFiles'">
+                    <td >
+                        <div class="ui active progress" id="uploadFileProgrssbar">
+                            <div class="bar">
+                                <div class="progress"></div>
+                            </div>
+                            <div class="label">Uploading Files</div>
                         </div>
                     </td>
                     <td></td>
@@ -291,6 +305,9 @@
 
                 },
                 listFolder: function () {
+
+                    console.log(fineUploaderBasicInstanceImages);
+
                     this.editMode = null;
                     this.editObject = null;
 
@@ -347,8 +364,6 @@
                         this.objectBlurEdit(object, event);
                     }
                 },
-
-
                 createFolder: function(object, event) {
                     event.preventDefault();
                     this.editObject = {
@@ -372,10 +387,12 @@
                     var resource = this.$resource('{{apiRoute('v1', 'api.documents.create_folder', ['pool' => ':pool'])}}');
                     resource.save({pool: this.currentPool.uid}, this.editObject, function (data, status, request) {
                         this.listFolder();
-                        this.currentPool.files.count++
+                        this.currentPool.objects.folders++
                     }.bind(this)).error(function (data, status, request) {
                         toastr.error(data.errors[0], data.message);
-                    });
+                        this.editMode = null;
+                        this.editObject = null;
+                    }.bind(this));
 
                 },
                 folderKeydownCreate: function (object, event) {
@@ -383,12 +400,60 @@
                         this.folderBlurCreate(object, event);
                     }
                 },
-
+                fileUploadStart: function() {
+                    this.editMode = 'uploadFiles';
+                },
+                fileUploadComplete: function(responseJSON) {
+                    if(responseJSON.data.uid){
+                        this.list_folder.push(responseJSON.data)
+                    }
+                }
 
             }
 
         });
 
 
+
+
+
+
+
+
+        var dragAndDropModule = new fineUploader.DragAndDrop({
+            dropZoneElements: [document.getElementById('file-list-table')],
+            callbacks: {
+                processingDroppedFilesComplete: function (files, dropTarget) {
+                    fineUploaderBasicInstanceImages.addFiles(files);
+                }
+            }
+        });
+
+        var fineUploaderBasicInstanceImages = new fineUploader.FineUploaderBasic({
+            button: document.getElementById('uploadFileButton'),
+            request: {
+                endpoint: '{{ apiRoute('v1', 'api.documents.file.store', ['pool' => 'oJNo'])}}',
+                inputName: 'data-binary',
+                customHeaders: {
+                    "Authorization": "Bearer {{$jwtoken}}"
+                }
+            },
+            callbacks: {
+                onComplete: function (id, name, responseJSON) {
+                    VueInstance.fileUploadComplete(responseJSON)
+                },
+                onUpload: function() {
+                    VueInstance.fileUploadStart();
+                },
+                onTotalProgress: function(totalUploadedBytes, totalBytes) {
+                    $('#uploadFileProgrssbar').progress({
+                        percent: Math.ceil(totalUploadedBytes / totalBytes * 100)
+                    });
+                },
+                onAllComplete: function(succeeded, failed) {
+                    VueInstance.editMode = null;
+                }
+            }
+        });
     </script>
 @endsection
