@@ -44,7 +44,7 @@ class Pool extends Model
     /**
      * Get the files in this pool.
      */
-    public function files()
+    public function objects()
     {
         return $this->hasMany('Modules\Documents\Entities\Object', 'pool_uid', 'uid');
     }

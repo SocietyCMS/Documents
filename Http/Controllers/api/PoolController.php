@@ -4,6 +4,7 @@ namespace Modules\Documents\Http\Controllers\api;
 
 use Illuminate\Http\Request;
 use Modules\Core\Http\Controllers\ApiBaseController;
+use Modules\Documents\Repositories\Criterias\PoolPermissionCriteria;
 use Modules\Documents\Repositories\PoolRepository;
 use Modules\Documents\Transformers\PoolTransformer;
 use Prettus\Validator\Contracts\ValidatorInterface;
@@ -62,16 +63,11 @@ class PoolController extends ApiBaseController
             );
         }
 
+        $this->repository->pushCriteria(new PoolPermissionCriteria($this->auth->user()));
+        $this->repository->skipCache(true);
+        $pools = $this->repository->paginate();
 
-        $pools = collect();
-        foreach ($this->repository->all() as $item) {
-            if($this->auth->user()->can(["documents::pool-{$item->uid}-read", "documents::pool-{$item->uid}-write"]))
-            {
-                $pools->push($item);
-            }
-        }
-
-        return $this->response->collection($pools, new PoolTransformer());
+        return $this->response->paginator($pools, new PoolTransformer());
     }
 
 

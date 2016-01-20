@@ -49,7 +49,7 @@
                     <i class="large home middle aligned icon"></i>
 
                     <div class="ui label"
-                         v-bind:class="{ 'blue': currentPool.uid == pool.uid }"> @{{ pool.files.count }}</div>
+                         v-bind:class="{ 'blue': currentPool.uid == pool.uid }"> @{{ pool.objects.files }}</div>
                     @{{ pool.title }}
                 </a>
             </div>
@@ -146,7 +146,7 @@
                     <th><span v-if="folder_meta">@{{ folder_meta.objects.folders }}
                             folders and @{{ folder_meta.objects.files }} files</span></th>
                     <th></th>
-                    <th class="right aligned collapsing">83 MB</th>
+                    <th class="right aligned collapsing"></th>
                     <th></th>
                 </tr>
                 </tfoot>

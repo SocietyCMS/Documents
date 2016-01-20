@@ -13,8 +13,10 @@ class PoolTransformer extends Fractal\TransformerAbstract
             'title'       => $pool->title,
             'description' => $pool->description,
             'quota'       => (int)$pool->quota,
-            'files'       => [
-                'count' => (int)$pool->files->count(),
+            'objects'   => [
+                'total' => $pool->count(),
+                'files' => $pool->objects->where('tag', 'file')->count(),
+                'folders' => $pool->objects->where('tag', 'folder')->count(),
             ],
             'userPermission' => [
               'read' => $this->user()->can("documents::pool-{$pool->uid}-read"),
