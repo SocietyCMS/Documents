@@ -3,6 +3,7 @@
 namespace Modules\Documents\Http\Controllers\api;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Modules\Core\Http\Controllers\ApiBaseController;
 use Modules\Documents\Repositories\Criterias\PoolCriteria;
 use Modules\Documents\Repositories\Criterias\withTrashCriteria;
@@ -85,6 +86,10 @@ class FileController extends ApiBaseController
 
         $file = $this->updateComputedProperties($request, $file);
 
+        Storage::disk('local')->put(
+            'documents/'.$file->uid,
+            file_get_contents($request->file('data-binary')->getRealPath())
+        );
 
         return $this->response->item($file, new ObjectTransformer());
     }

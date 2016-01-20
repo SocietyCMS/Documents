@@ -90,9 +90,9 @@
                 <tbody>
 
                 <tr class="object" v-if="editMode == 'createFolder'">
-                    <td >
+                    <td>
                         <div class="ui input">
-                            <input type="text"  id="createFolderInput"
+                            <input type="text" id="createFolderInput"
                                    v-model="editObject.title" v-on:blur="folderBlurCreate(editObject, $event)"
                                    v-on:keydown="folderKeydownCreate(editObject, $event)">
                         </div>
@@ -104,7 +104,7 @@
 
                 <tr class="object" v-for="object in list_folder
                                                 | filterBy filterKey
-                                                | advancedSort sortKey sortReverse" >
+                                                | advancedSort sortKey sortReverse">
 
                     <td class="selectable">
                         <a href="#"
@@ -112,8 +112,9 @@
                                     v-bind:class="object.mimeType | semanticFileTypeClass"
                                     class="icon"></i>
 
-                            <div class="ui text" v-if="editObject != object">@{{ object.title }} <span class="ui gray text"
-                                                                           v-if="object.fileExtension">.@{{ object.fileExtension }}</span>
+                            <div class="ui text" v-if="editObject != object">@{{ object.title }} <span
+                                        class="ui gray text"
+                                        v-if="object.fileExtension">.@{{ object.fileExtension }}</span>
                             </div>
                             <div class="ui input" v-else>
                                 <input type="text" v-model="object.title" v-on:blur="objectBlurEdit(object, $event)"
@@ -186,27 +187,19 @@
     <script>
 
         function initializeComponents() {
-            $('.ui.dropdown')
-                    .dropdown();
-/*
-            $('.ui.sortable.table th.filename').data('sortBy', function (th, td, tablesort) {
-                var tag = $(td).data('tag');
+            setTimeout(function () {
 
-                if (tag == 'folder') {
-                    return '0' + $(td).data('sort-value').toLowerCase();
-                }
-                return '1' + $(td).data('sort-value').toLowerCase();
-            });
+                $('.ui.dropdown')
+                        .dropdown();
 
-            $('.ui.sortable.table').tablesort().data('tablesort').sort($(".ui.sortable.table th.filename"));
- */
+            }, 100);
         }
 
-        function isObject (obj) {
+        function isObject(obj) {
             return obj !== null && typeof obj === 'object'
         }
 
-        function getPath (obj, path) {
+        function getPath(obj, path) {
             return parseExpression(path).get(obj)
         }
 
@@ -228,18 +221,18 @@
                 editObject: null,
                 editMode: null,
                 sortKey: '',
-                sortReverse:1
+                sortReverse: 1
             },
             ready: function () {
 
                 var resource = this.$resource('{{apiRoute('v1', 'api.documents.pool.index')}}');
                 // save item
                 resource.get({}).then(function (response) {
-                    this.pools= response.data.data;
+                    this.pools = response.data.data;
                     this.currentPool = response.data.data[0];
                     this.setFromURL();
                 }.bind(this), function (response) {
-                    toastr.error(response.data.message, 'Error: '+response.data.status_code);
+                    toastr.error(response.data.message, 'Error: ' + response.data.status_code);
                 }.bind(this));
 
             },
@@ -299,7 +292,7 @@
                         return this.currentFolder = object.uid
                     }
 
-                    return console.log(object.downloadUrl);
+                    return window.open(object.downloadUrl + '?token={{$jwtoken}}',"_blank")
                 },
                 breadcrumbClick: function (uid) {
                     return this.currentFolder = uid
@@ -331,8 +324,7 @@
                     this.editMode = null;
                     this.editObject = null;
 
-                    if(!this.currentPool)
-                    {
+                    if (!this.currentPool) {
                         return;
                     }
 
@@ -343,14 +335,14 @@
                         this.list_folder = data.data;
                         this.folder_meta = data.meta;
 
-                        window.location.hash = this.currentPool.uid + ':' + (this.folder_meta.parent_uid?this.folder_meta.parent_uid:'');
+                        window.location.hash = this.currentPool.uid + ':' + (this.folder_meta.parent_uid ? this.folder_meta.parent_uid : '');
 
                         this.$nextTick(function () {
                             initializeComponents()
                         })
 
                     }.bind(this)).error(function (data, status, request) {
-                        toastr.error(data.message, 'Error: '+status);
+                        toastr.error(data.message, 'Error: ' + status);
                         this.currentFolder = null
                     });
 
@@ -375,16 +367,17 @@
                 objectBlurEdit: function (object, event) {
                     event.preventDefault();
 
-                    if(this.editObject== null  || this.editMode != 'rename'){ return;}
+                    if (this.editObject == null || this.editMode != 'rename') {
+                        return;
+                    }
 
                     var resource = this.$resource('{{apiRoute('v1', 'api.documents.file.update', ['pool' => ':pool'])}}');
                     resource.update({pool: this.currentPool.uid}, this.editObject, function (data, status, request) {
                         this.editMode = null;
                         this.editObject = null;
                     }.bind(this)).error(function (data, status, request) {
-                        toastr.error(data.message, 'Error: '+status);
+                        toastr.error(data.message, 'Error: ' + status);
                     });
-
 
 
                 },
@@ -393,7 +386,7 @@
                         this.objectBlurEdit(object, event);
                     }
                 },
-                createFolder: function(object, event) {
+                createFolder: function (object, event) {
                     event.preventDefault();
                     this.editObject = {
                         mimeType: "application/x-directory",
@@ -411,14 +404,17 @@
                 folderBlurCreate: function (object, event) {
                     event.preventDefault();
 
-                    if(this.editObject == null || this.editMode != 'createFolder'){ return;}
+                    if (this.editObject == null || this.editMode != 'createFolder') {
+                        return;
+                    }
 
                     var resource = this.$resource('{{apiRoute('v1', 'api.documents.create_folder', ['pool' => ':pool'])}}');
                     resource.save({pool: this.currentPool.uid}, this.editObject, function (data, status, request) {
                         this.editMode = null;
                         this.editObject = null;
                         this.list_folder.push(data.data);
-                        this.currentPool.objects.folders++
+                        this.currentPool.objects.folders++;
+                        initializeComponents();
                     }.bind(this)).error(function (data, status, request) {
                         toastr.error(data.errors[0], data.message);
                         this.editMode = null;
@@ -431,16 +427,17 @@
                         this.folderBlurCreate(object, event);
                     }
                 },
-                fileUploadStart: function() {
+                fileUploadStart: function () {
                     this.editMode = 'uploadFiles';
                 },
-                fileUploadComplete: function(responseJSON) {
-                    if(responseJSON.data.uid){
+                fileUploadComplete: function (responseJSON) {
+                    if (responseJSON.data.uid) {
                         this.list_folder.push(responseJSON.data);
-                        this.folder_meta.objects.files++
+                        this.folder_meta.objects.files++;
+                        initializeComponents();
                     }
                 },
-                fileUploadAllComplete: function(responseJSON) {
+                fileUploadAllComplete: function (responseJSON) {
                     this.editMode = null;
                 }
 
@@ -471,15 +468,15 @@
                 onComplete: function (id, name, responseJSON) {
                     VueInstance.fileUploadComplete(responseJSON)
                 },
-                onUpload: function() {
+                onUpload: function () {
                     VueInstance.fileUploadStart();
                 },
-                onTotalProgress: function(totalUploadedBytes, totalBytes) {
+                onTotalProgress: function (totalUploadedBytes, totalBytes) {
                     $('#uploadFileProgrssbar').progress({
                         percent: Math.ceil(totalUploadedBytes / totalBytes * 100)
                     });
                 },
-                onAllComplete: function(succeeded, failed) {
+                onAllComplete: function (succeeded, failed) {
                     VueInstance.fileUploadAllComplete(succeeded, failed);
                 }
             }

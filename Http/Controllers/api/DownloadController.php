@@ -3,9 +3,11 @@
 namespace Modules\Documents\Http\Controllers\api;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 use Modules\Core\Http\Controllers\ApiBaseController;
+use Modules\Documents\Repositories\Criterias\PoolCriteria;
 use Modules\Documents\Repositories\ObjectRepository;
-use Modules\Documents\Transformers\ObjectTransformer;
 
 
 /**
@@ -25,11 +27,16 @@ class DownloadController extends ApiBaseController
      * FileController constructor.
      * @param ObjectRepository $repository
      */
-    public function __construct(ObjectRepository $repository)
+    public function __construct(ObjectRepository $repository, Request $request)
     {
         parent::__construct();
 
         $this->repository = $repository;
+
+        $this->repository->pushCriteria(new PoolCriteria($request->pool));
+
+        $this->middleware("permission:documents::pool-{$request->pool}-read", ['only' => ['index', 'get']]);
+
     }
 
     /**
@@ -37,9 +44,21 @@ class DownloadController extends ApiBaseController
      * @param         $file
      * @return mixed
      */
-    public function download(Request $request, $file)
+    public function download(Request $request)
     {
-        $file = $this->repository->findByUid($file);
-        return $this->response->item($file, new ObjectTransformer());
+        $file = $this->repository->findByUid($request->file);
+        $contents = Storage::disk('local')->get( 'documents/'.$file->uid);
+
+        $headers = [
+            "Content-Type" =>$file->mimeType,
+            "Content-Length" => $file->fileSize
+        ];
+
+        return (new Response($contents, 200))
+            ->header('Content-Type', $file->mimeType)
+            ->header('Content-Length', $file->fileSize)
+            ->header('Content-Disposition',"filename='{$file->title}.{$file->fileExtension}'");
+
+        return Response::download($contents,  200, $headers);
     }
 }

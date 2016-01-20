@@ -1,12 +1,12 @@
 <?php namespace Modules\Documents\Http\Controllers\backend;
 
-use Pingpong\Modules\Routing\Controller;
+use Modules\Core\Http\Controllers\AdminBaseController;
 
 /**
  * Class DocumentsController
  * @package Modules\Documents\Http\Controllers\backend
  */
-class DocumentsController extends Controller
+class DocumentsController extends AdminBaseController
 {
 
     /**
