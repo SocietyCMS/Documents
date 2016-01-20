@@ -56,7 +56,7 @@ class FolderController extends ApiBaseController
         $this->repository->pushCriteria(new ParentCriteria($request->input('parent_uid', null)));
         $this->repository->pushCriteria(new withTrashCriteria($request->input('with_trash', false)));
 
-        $objects = $this->repository->paginate(15);
+        $objects = $this->repository->paginate(100);
 
         $meta = [
             'parent_uid' => $request->input('parent_uid', null),

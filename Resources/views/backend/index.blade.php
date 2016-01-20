@@ -57,18 +57,32 @@
         </div>
         <div v-bind:class="{ 'twelve': pools.length > 1, 'wide': pools.length > 1, 'column': pools.length > 1, 'column': pools.length = 1}">
 
+            <div class="ui progress" id="uploadFileProgrssbar" v-if="editMode == 'uploadFiles'">
+                <div class="bar">
+                    <div class="progress"></div>
+                </div>
+                <div class="label">Uploading Files</div>
+            </div>
+
+
             <table class="ui sortable selectable table" id="file-list-table">
                 <thead>
                 <tr>
-                    <th class="therteen wide filename">
+                    <th class="therteen wide filename"
+                        v-on:click="sortBy('title')"
+                        v-bind:class="{ 'sorted': sortKey == 'tag', 'ascending':sortReverse>0, 'descending':sortReverse<0}">
                         Name
                     </th>
-                    <th class="one wide no-sort">
+                    <th class="one wide">
                     </th>
-                    <th class="one wide right aligned">
+                    <th class="one wide right aligned"
+                        v-on:click="sortBy('objectSize')"
+                        v-bind:class="{ 'sorted': sortKey == 'objectSize', 'ascending':sortReverse>0, 'descending':sortReverse<0}">
                         Size
                     </th>
-                    <th class="two wide right aligned">
+                    <th class="two wide right aligned"
+                        v-on:click="sortBy('created_at.timestamp')"
+                        v-bind:class="{ 'sorted': sortKey == 'created_at.timestamp', 'ascending':sortReverse>0, 'descending':sortReverse<0}">
                         Modified
                     </th>
                 </tr>
@@ -88,22 +102,11 @@
                     <td></td>
                 </tr>
 
-                <tr class="object" v-if="editMode == 'uploadFiles'">
-                    <td >
-                        <div class="ui active progress" id="uploadFileProgrssbar">
-                            <div class="bar">
-                                <div class="progress"></div>
-                            </div>
-                            <div class="label">Uploading Files</div>
-                        </div>
-                    </td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
+                <tr class="object" v-for="object in list_folder
+                                                | filterBy filterKey
+                                                | advancedSort sortKey sortReverse" >
 
-                <tr class="object" v-for="object in list_folder">
-                    <td class="selectable" data-sort-value="@{{ object.title }}" data-tag="@{{ object.tag }}">
+                    <td class="selectable">
                         <a href="#"
                            v-on:click="objectOpen(object, $event)"><i
                                     v-bind:class="object.mimeType | semanticFileTypeClass"
@@ -149,10 +152,9 @@
                         </div>
 
                     </td>
-                    <td class="right aligned collapsing" data-sort-value="@{{ object.objectSize }}"
-                        v-text="object.objectSize | humanReadableFilesize"></td>
                     <td class="right aligned collapsing"
-                        data-sort-value="@{{ object.created_at.timestamp }}">@{{ object.created_at.diffForHumans }}</td>
+                        v-text="object.objectSize | humanReadableFilesize"></td>
+                    <td class="right aligned collapsing">@{{ object.created_at.diffForHumans }}</td>
                 </tr>
                 </tbody>
                 <tfoot>
@@ -184,11 +186,9 @@
     <script>
 
         function initializeComponents() {
-            $('.ui.sortable.table').tablesort();
-
             $('.ui.dropdown')
                     .dropdown();
-
+/*
             $('.ui.sortable.table th.filename').data('sortBy', function (th, td, tablesort) {
                 var tag = $(td).data('tag');
 
@@ -199,7 +199,23 @@
             });
 
             $('.ui.sortable.table').tablesort().data('tablesort').sort($(".ui.sortable.table th.filename"));
+ */
         }
+
+        function isObject (obj) {
+            return obj !== null && typeof obj === 'object'
+        }
+
+        function getPath (obj, path) {
+            return parseExpression(path).get(obj)
+        }
+
+        Vue.filter('advancedSort', function (arr, sortKey, reverse) {
+            var orderBy = Vue.filter('orderBy');
+            var orderdArrayKey = orderBy(arr, sortKey, reverse);
+            return orderBy(orderdArrayKey, 'tag', -1);
+        });
+
 
         var VueInstance = new Vue({
             el: '#content',
@@ -210,7 +226,9 @@
                 list_folder: null,
                 folder_meta: null,
                 editObject: null,
-                editMode: null
+                editMode: null,
+                sortKey: '',
+                sortReverse:1
             },
             ready: function () {
 
@@ -258,6 +276,10 @@
                 }
             },
             methods: {
+                sortBy: function (sortKey) {
+                    this.sortReverse = (this.sortKey == sortKey) ? this.sortReverse * -1 : 1;
+                    this.sortKey = sortKey;
+                },
                 poolClick: function (pool) {
                     if (this.currentPool != pool) {
                         this.currentPool = pool;
@@ -306,8 +328,6 @@
                 },
                 listFolder: function () {
 
-                    console.log(fineUploaderBasicInstanceImages);
-
                     this.editMode = null;
                     this.editObject = null;
 
@@ -316,12 +336,14 @@
                         return;
                     }
 
+                    this.list_folder = null;
+
                     var resource = this.$resource('{{apiRoute('v1', 'api.documents.list_folder', ['pool' => ':pool'])}}');
                     resource.get({pool: this.currentPool.uid}, {parent_uid: this.currentFolder}, function (data, status, request) {
                         this.list_folder = data.data;
                         this.folder_meta = data.meta;
 
-                        window.location.hash = this.currentPool.uid + ':' + this.folder_meta.parent_uid;
+                        window.location.hash = this.currentPool.uid + ':' + (this.folder_meta.parent_uid?this.folder_meta.parent_uid:'');
 
                         this.$nextTick(function () {
                             initializeComponents()
@@ -330,6 +352,13 @@
                     }.bind(this)).error(function (data, status, request) {
                         toastr.error(data.message, 'Error: '+status);
                         this.currentFolder = null
+                    });
+
+                    fineUploaderBasicInstanceImages.setEndpoint(
+                            Vue.url('{{ apiRoute('v1', 'api.documents.file.store', ['pool' => ':pool'])}}', {pool: this.currentPool.uid})
+                    );
+                    fineUploaderBasicInstanceImages.setParams({
+                        parent_uid: this.currentFolder
                     });
                 },
                 objectEdit: function (object, event) {
@@ -386,7 +415,9 @@
 
                     var resource = this.$resource('{{apiRoute('v1', 'api.documents.create_folder', ['pool' => ':pool'])}}');
                     resource.save({pool: this.currentPool.uid}, this.editObject, function (data, status, request) {
-                        this.listFolder();
+                        this.editMode = null;
+                        this.editObject = null;
+                        this.list_folder.push(data.data);
                         this.currentPool.objects.folders++
                     }.bind(this)).error(function (data, status, request) {
                         toastr.error(data.errors[0], data.message);
@@ -405,19 +436,17 @@
                 },
                 fileUploadComplete: function(responseJSON) {
                     if(responseJSON.data.uid){
-                        this.list_folder.push(responseJSON.data)
+                        this.list_folder.push(responseJSON.data);
+                        this.folder_meta.objects.files++
                     }
+                },
+                fileUploadAllComplete: function(responseJSON) {
+                    this.editMode = null;
                 }
 
             }
 
         });
-
-
-
-
-
-
 
 
         var dragAndDropModule = new fineUploader.DragAndDrop({
@@ -432,7 +461,7 @@
         var fineUploaderBasicInstanceImages = new fineUploader.FineUploaderBasic({
             button: document.getElementById('uploadFileButton'),
             request: {
-                endpoint: '{{ apiRoute('v1', 'api.documents.file.store', ['pool' => 'oJNo'])}}',
+                endpoint: '',
                 inputName: 'data-binary',
                 customHeaders: {
                     "Authorization": "Bearer {{$jwtoken}}"
@@ -451,9 +480,10 @@
                     });
                 },
                 onAllComplete: function(succeeded, failed) {
-                    VueInstance.editMode = null;
+                    VueInstance.fileUploadAllComplete(succeeded, failed);
                 }
             }
         });
+
     </script>
 @endsection

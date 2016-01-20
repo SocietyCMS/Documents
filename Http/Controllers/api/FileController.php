@@ -53,7 +53,7 @@ class FileController extends ApiBaseController
      */
     public function index(Request $request)
     {
-        $files = $this->repository->paginate(15);
+        $files = $this->repository->paginate(100);
         $meta = [
             'directory' => '/',
         ];
@@ -77,7 +77,7 @@ class FileController extends ApiBaseController
 
         $file = $this->repository->create([
             'description' => $request->description,
-            'parent_uid'  => $request->parent_uid,
+            'parent_uid'  => empty($request->parent_uid)?null:$request->parent_uid,
             'shared'      => $request->shared,
             'user_id'     => $this->user()->id,
             'pool_uid'    => $request->pool,
@@ -116,7 +116,7 @@ class FileController extends ApiBaseController
         $file = $this->repository->update([
             'title'       => $request->title,
             'description' => $request->description,
-            'parent_uid'  => $request->parent_uid,
+            'parent_uid'  => empty($request->parent_uid)?null:$request->parent_uid,
             'shared'      => $request->shared,
             'user_id'     => $this->user()->id,
             'pool_uid'    => $request->pool,
