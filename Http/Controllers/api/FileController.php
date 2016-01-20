@@ -86,7 +86,7 @@ class FileController extends ApiBaseController
 
         $file = $this->updateComputedProperties($request, $file);
 
-        Storage::disk('local')->put(
+        Storage::disk('storage')->put(
             'documents/'.$file->uid,
             file_get_contents($request->file('data-binary')->getRealPath())
         );
@@ -96,7 +96,6 @@ class FileController extends ApiBaseController
 
     /**
      * @param Request $request
-     * @param         $file
      * @return mixed
      */
     public function get(Request $request)
