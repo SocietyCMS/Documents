@@ -2,10 +2,7 @@
 'use strict';
 
 Vue.filter('humanReadableFilesize', function (size) {
-    if (size) {
-        return filesize(size, { round: 0 });
-    }
-    return '';
+    return filesize(size, { round: 0 });
 });
 
 Vue.filter('semanticFileTypeClass', function (mime) {

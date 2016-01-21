@@ -7,7 +7,7 @@
 @section('content')
 
     <div class="ui breadcrumb filepath" v-show="currentPool">
-        <a class="section" v-on:click="currentFolder = nul">
+        <a class="section" v-on:click="currentFolder = nul" v-if="currentPool">
             <i class="home icon"></i>
             @{{ currentPool.title }}
         </a>
@@ -50,21 +50,34 @@
                          v-bind:class="{ 'blue': currentPool.uid == pool.uid }"> @{{ pool.objects.files }}</div>
                     @{{ pool.title }}
                 </a>
+            </div>
 
-                <div class="clearing item">
-                    <button class="ui right floated toggle icon button" v-bind:class="{'active':showDeleted}" v-on:click="showDeleted=!showDeleted">
+            <div class="ui segments" v-if="currentPool">
+
+                <div class="ui segment">
+                    <a class="ui toggle icon button" v-bind:class="{'active':showDeleted}" v-on:click="showDeleted=!showDeleted">
                         <i class="trash outline icon"></i>
-                    </button>
-                    <button class="ui basic button">
-                        <i class="settings icon"></i>
-                        Settings
-                    </button>
+                    </a>
+                </div>
+
+                <div class="ui segment">
+                    <div class="ui blue progress" v-bind:class="{'blue': currentPoolQuotaProgrssbar<=80, 'red': currentPoolQuotaProgrssbar>80}" id="currentPoolQuotaProgrssbar">
+                        <div class="bar"></div>
+                        <div class="label"> @{{ currentPool.quotaUsed | humanReadableFilesize }} of @{{ currentPool.quota | humanReadableFilesize }} used</div>
+                    </div>
+                </div>
+                <div class="ui segment">
+
+                    <a class="ui basic button" v-on:click="poolsModal">
+                        <i class="disk outline icon"></i>
+                        Pools
+                    </a>
                 </div>
 
             </div>
 
         </div>
-        <div v-bind:class="{ 'twelve': pools.length > 1, 'wide': pools.length > 1, 'column': pools.length > 1, 'column': pools.length = 1}">
+        <div class="twelve wide column">
 
             <div class="ui progress" id="uploadFileProgrssbar" v-if="editMode == 'uploadFiles'">
                 <div class="bar">
@@ -74,7 +87,7 @@
             </div>
 
 
-            <table class="ui sortable selectable table" id="file-list-table">
+            <table class="ui selectable table" id="file-list-table">
                 <thead>
                 <tr>
                     <th class="therteen wide filename"
@@ -162,8 +175,8 @@
                         </div>
 
                     </td>
-                    <td class="right aligned collapsing"
-                        v-text="object.objectSize | humanReadableFilesize"></td>
+                    <td class="right aligned collapsing" v-if="object.tag == 'file'">@{{ object.objectSize | humanReadableFilesize }}</td>
+                    <td class="right aligned collapsing" v-if="object.tag == 'folder'">-</td>
                     <td class="right aligned collapsing">@{{ object.created_at.diffForHumans }}</td>
                 </tr>
                 </tbody>
@@ -184,6 +197,47 @@
 
         </div>
     </div>
+
+
+
+
+
+    <div class="ui modal" id="poolsModal">
+        <i class="close icon"></i>
+        <div class="header">
+            Pools
+        </div>
+        <div class="content">
+
+            <div class="ui divided items">
+
+                <div class="item" v-for="pool in pools">
+
+                    <i class="huge disk outline icon"></i>
+                    <div class="middle aligned content">
+
+                        <h3 class="ui header">@{{ pool.title }}</h3>
+                            <div class="ui tiny blue progress" data-percent="@{{ 100 / pool.quota * pool.quotaUsed }}">
+                                <div class="bar"></div>
+                                <div class="label"> @{{ pool.quotaUsed | humanReadableFilesize }} of @{{ pool.quota | humanReadableFilesize }} used</div>
+                            </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        <div class="actions">
+            <div class="ui black deny button">
+                Nope
+            </div>
+            <div class="ui positive right labeled icon button">
+                Yep, that's me
+                <i class="checkmark icon"></i>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('styles')
@@ -201,8 +255,16 @@
                 $('.ui.dropdown')
                         .dropdown();
 
+                $('#currentPoolQuotaProgrssbar').progress({
+                    percent: VueInstance.currentPoolQuotaProgrssbar,
+                    showActivity: false,
+                    autoSuccess: false
+                });
+
             }, 100);
         }
+
+
 
         function isObject(obj) {
             return obj !== null && typeof obj === 'object'
@@ -229,7 +291,7 @@
                 folder_meta: null,
                 editObject: null,
                 editMode: null,
-                sortKey: '',
+                sortKey: 'title',
                 sortReverse: 1,
                 showDeleted:false,
             },
@@ -279,6 +341,12 @@
                         return returnObject;
                     }
                     return [];
+                },
+                currentPoolQuotaProgrssbar: function() {
+                    if(this.currentPool.quotaUsed > this.currentPool.quota){
+                        return 100;
+                    }
+                    return Math.ceil(this.currentPool.quotaUsed / this.currentPool.quota * 100)
                 }
             },
             methods: {
@@ -341,7 +409,7 @@
                         return;
                     }
 
-                    this.list_folder = null;
+                    //this.list_folder = null;
 
                     var resource = this.$resource('{{apiRoute('v1', 'api.documents.list_folder', ['pool' => ':pool'])}}');
                     resource.get({pool: this.currentPool.uid}, {parent_uid: this.currentFolder, with_trash:this.showDeleted}, function (data, status, request) {
@@ -474,12 +542,22 @@
                         this.list_folder.push(responseJSON.data);
                         this.folder_meta.objects.files++;
                         this.currentPool.objects.files++;
+
+                        this.currentPool.quotaUsed += responseJSON.data.objectSize;
+
                         initializeComponents();
                     }
                 },
                 fileUploadAllComplete: function (responseJSON) {
                     this.editMode = null;
+                },
+
+                poolsModal: function () {
+                    $('#poolsModal')
+                            .modal('show')
+                    ;
                 }
+
 
             }
 

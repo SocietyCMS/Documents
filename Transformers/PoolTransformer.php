@@ -9,23 +9,24 @@ class PoolTransformer extends Fractal\TransformerAbstract
     public function transform($pool)
     {
         return [
-            'uid'         => $pool->uid,
-            'title'       => $pool->title,
-            'description' => $pool->description,
-            'quota'       => (int)$pool->quota,
-            'objects'   => [
-                'total' => $pool->count(),
-                'files' => $pool->objects->where('tag', 'file')->count(),
+            'uid'            => $pool->uid,
+            'title'          => $pool->title,
+            'description'    => $pool->description,
+            'quota'          => (int)$pool->quota,
+            'quotaUsed'      => $pool->objects->where('tag', 'file')->sum('fileSize'),
+            'objects'        => [
+                'total'   => $pool->count(),
+                'files'   => $pool->objects->where('tag', 'file')->count(),
                 'folders' => $pool->objects->where('tag', 'folder')->count(),
             ],
             'userPermission' => [
-              'read' => $this->user()->can("documents::pool-{$pool->uid}-read"),
-              'write' => $this->user()->can("documents::pool-{$pool->uid}-write"),
+                'read'  => $this->user()->can("documents::pool-{$pool->uid}-read"),
+                'write' => $this->user()->can("documents::pool-{$pool->uid}-write"),
             ],
-            'deleted'     => (bool)$pool->trashed(),
-            'created_at'  => $pool->created_at->toRfc3339String(),
-            'updated_at'  => $pool->updated_at->toRfc3339String(),
-            'deleted_at'  => isset($pool->deleted_at) ? $pool->deleted_at->toRfc3339String() : null,
+            'deleted'        => (bool)$pool->trashed(),
+            'created_at'     => $pool->created_at->toRfc3339String(),
+            'updated_at'     => $pool->updated_at->toRfc3339String(),
+            'deleted_at'     => isset($pool->deleted_at) ? $pool->deleted_at->toRfc3339String() : null,
         ];
     }
 
