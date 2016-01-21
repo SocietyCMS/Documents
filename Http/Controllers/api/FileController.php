@@ -78,7 +78,7 @@ class FileController extends ApiBaseController
 
         $file = $this->repository->create([
             'description' => $request->description,
-            'parent_uid'  => empty($request->parent_uid)?null:$request->parent_uid,
+            'parent_uid'  => $this->sanitizeUid($request->parent_uid),
             'shared'      => $request->shared,
             'user_id'     => $this->user()->id,
             'pool_uid'    => $request->pool,
@@ -120,7 +120,7 @@ class FileController extends ApiBaseController
         $file = $this->repository->update([
             'title'       => $request->title,
             'description' => $request->description,
-            'parent_uid'  => empty($request->parent_uid)?null:$request->parent_uid,
+            'parent_uid'  => $this->sanitizeUid($request->parent_uid),
             'shared'      => $request->shared,
             'user_id'     => $this->user()->id,
             'pool_uid'    => $request->pool,
@@ -137,9 +137,7 @@ class FileController extends ApiBaseController
      */
     public function destroy(Request $request)
     {
-        $file = $this->repository->findByUid($request->uid);
-
-        $file->delete();
+        $this->repository->delete($request->uid);
 
         return $this->successDeleted();
     }
@@ -150,10 +148,7 @@ class FileController extends ApiBaseController
      */
     public function forceDestroy(Request $request)
     {
-        $this->repository->pushCriteria(new withTrashCriteria($request->input('with_trash', true)));
-        $file = $this->repository->findByUid($request->uid);
-
-        $file->forceDelete();
+        $this->repository->forceDelete($request->uid);
 
         return $this->successDeleted();
     }
@@ -198,5 +193,18 @@ class FileController extends ApiBaseController
         }
 
         return $file;
+    }
+
+    /**
+     * @param $uid
+     * @return null
+     */
+    private function sanitizeUid($uid)
+    {
+        if(empty($uid) || strtolower($uid) == 'null'){
+            return null;
+        }
+
+        return$uid;
     }
 }

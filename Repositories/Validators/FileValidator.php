@@ -20,13 +20,11 @@ class FileValidator extends BaseValidator
         ValidatorInterface::RULE_CREATE => [
             'title'       => 'string',
             'description' => 'min:3',
-            'parent_uid'  => 'exists:documents__objects,uid',
             'shared'      => 'boolean',
         ],
         ValidatorInterface::RULE_UPDATE => [
-            'title'       => 'string',
+            'title'       => 'required|min:3|string',
             'description' => 'min:3',
-            'parent_uid'  => 'exists:documents__objects,uid',
             'shared'      => 'boolean',
         ],
     ];

@@ -22,7 +22,7 @@ class withTrashCriteria implements CriteriaInterface
      */
     public function __construct($with_trash)
     {
-        $this->with_trash = (bool) $with_trash;
+        $this->with_trash = filter_var($with_trash, FILTER_VALIDATE_BOOLEAN);
     }
 
 

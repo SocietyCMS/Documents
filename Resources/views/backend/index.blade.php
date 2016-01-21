@@ -9,7 +9,7 @@
 
 @section('content')
 
-    <div class="ui breadcrumb filepath" v-if="currentPool">
+    <div class="ui breadcrumb filepath" v-show="currentPool">
         <a class="section" v-on:click="currentFolder = nul">
             <i class="home icon"></i>
             @{{ currentPool.title }}
@@ -20,6 +20,7 @@
             <a class="ui section text" v-on:click="breadcrumbClick(item.uid)"
                v-bind:class="{ 'black': currentFolder == item.uid }">@{{ item.title }}</a>
         </template>
+
 
         <i class="right angle icon divider"></i>
 
@@ -40,7 +41,7 @@
 
 
     <div class="ui grid">
-        <div class="four wide column" v-if="pools.length > 1">
+        <div class="four wide column">
 
             <div class="ui fluid vertical pointing menu filepools">
 
@@ -52,6 +53,17 @@
                          v-bind:class="{ 'blue': currentPool.uid == pool.uid }"> @{{ pool.objects.files }}</div>
                     @{{ pool.title }}
                 </a>
+
+                <div class="clearing item">
+                    <button class="ui right floated toggle icon button" v-bind:class="{'active':showDeleted}" v-on:click="showDeleted=!showDeleted">
+                        <i class="trash outline icon"></i>
+                    </button>
+                    <button class="ui basic button">
+                        <i class="settings icon"></i>
+                        Settings
+                    </button>
+                </div>
+
             </div>
 
         </div>
@@ -102,9 +114,9 @@
                     <td></td>
                 </tr>
 
-                <tr class="object" v-for="object in list_folder
-                                                | filterBy filterKey
-                                                | advancedSort sortKey sortReverse">
+                <tr class="object" v-bind:class="{'negative':object.deleted}"   v-for="object in list_folder
+                                                                                    | filterBy filterKey
+                                                                                    | advancedSort sortKey sortReverse">
 
                     <td class="selectable">
                         <a href="#"
@@ -118,37 +130,37 @@
                             </div>
                             <div class="ui input" v-else>
                                 <input type="text" v-model="object.title" v-on:blur="objectBlurEdit(object, $event)"
-                                       v-on:keydown="objectKeydownEdit(object, $event)">
+                                       v-on:keydown="objectKeydownEdit(object, $event)" id="objectEditInput-@{{object.uid}}">
                             </div>
 
                         </a>
                     </td>
                     <td class="collapsing">
-                        <button class="circular ui icon button"><i class="share alternate icon"></i></button>
 
-                        <div class="ui top left pointing dropdown">
+                        <button class="circular ui icon positive button" v-if="object.deleted"><i class="life ring icon"></i></button>
+                        <button class="circular ui icon negative button" v-if="object.deleted"><i class="trash icon"></i></button>
+
+
+                        <button class="circular ui icon button" v-if="!object.deleted"><i class="share alternate icon"></i></button>
+
+                        <div class="ui top left pointing dropdown" v-if="!object.deleted">
                             <button class="circular ui icon button"><i class="ellipsis horizontal icon"></i></button>
 
                             <div class="menu">
                                 <div class="item" v-on:click="objectOpen(object, $event)">
-                                    <span class="description">ctrl + o</span>
                                     Open...
                                 </div>
                                 <div class="item" v-on:click="objectEdit(object, $event)">
-                                    <span class="description">ctrl + r</span>
                                     Rename
                                 </div>
-                                <div class="item">Make a copy</div>
                                 <div class="item">
                                     <i class="folder icon"></i>
                                     Move to folder
                                 </div>
-                                <div class="item">
+                                <div class="item" v-on:click="objectDelete(object, $event)">
                                     <i class="trash icon"></i>
                                     Move to trash
                                 </div>
-                                <div class="divider"></div>
-                                <div class="item">Download As...</div>
                             </div>
                         </div>
 
@@ -221,7 +233,8 @@
                 editObject: null,
                 editMode: null,
                 sortKey: '',
-                sortReverse: 1
+                sortReverse: 1,
+                showDeleted:false,
             },
             ready: function () {
 
@@ -238,6 +251,9 @@
             },
             watch: {
                 'currentFolder': function (val, oldVal) {
+                    this.listFolder()
+                },
+                'showDeleted': function (val, oldVal) {
                     this.listFolder()
                 }
             },
@@ -331,7 +347,7 @@
                     this.list_folder = null;
 
                     var resource = this.$resource('{{apiRoute('v1', 'api.documents.list_folder', ['pool' => ':pool'])}}');
-                    resource.get({pool: this.currentPool.uid}, {parent_uid: this.currentFolder}, function (data, status, request) {
+                    resource.get({pool: this.currentPool.uid}, {parent_uid: this.currentFolder, with_trash:this.showDeleted}, function (data, status, request) {
                         this.list_folder = data.data;
                         this.folder_meta = data.meta;
 
@@ -360,7 +376,7 @@
                     this.editMode = 'rename';
 
                     setTimeout(function () {
-                                $('.object .title.edit .input input').focus()
+                                $('#objectEditInput-'+object.uid).focus()
                             }
                             , 50);
                 },
@@ -376,7 +392,32 @@
                         this.editMode = null;
                         this.editObject = null;
                     }.bind(this)).error(function (data, status, request) {
-                        toastr.error(data.message, 'Error: ' + status);
+                        toastr.error(data.errors[0], 'Error: ' + data.message);
+                    });
+
+                },
+                objectDelete: function (object, event) {
+                    event.preventDefault();
+
+                    var resource = this.$resource('{{apiRoute('v1', 'api.documents.file.destroy', ['pool' => ':pool'])}}');
+                    resource.delete({pool: this.currentPool.uid}, object, function (data, status, request) {
+                        if(status)
+                        {
+                            if(this.showDeleted) {
+                                object.deleted = true;
+                            } else {
+                                this.list_folder.$remove(object);
+                            }
+
+
+                            if (object.tag == 'file') {
+                                this.folder_meta.objects.files--;
+                                this.currentPool.objects.files--;
+                            }
+                        }
+                        console.log(data, status, request);
+                    }.bind(this)).error(function (data, status, request) {
+                        toastr.error(data.errors[0], 'Error: ' + data.message);
                     });
 
 
@@ -399,7 +440,7 @@
                     setTimeout(function () {
                                 $('#createFolderInput').focus()
                             }
-                            , 100);
+                            , 50);
                 },
                 folderBlurCreate: function (object, event) {
                     event.preventDefault();
@@ -413,6 +454,7 @@
                         this.editMode = null;
                         this.editObject = null;
                         this.list_folder.push(data.data);
+                        this.folder_meta.objects.folders++;
                         this.currentPool.objects.folders++;
                         initializeComponents();
                     }.bind(this)).error(function (data, status, request) {
@@ -434,6 +476,7 @@
                     if (responseJSON.data.uid) {
                         this.list_folder.push(responseJSON.data);
                         this.folder_meta.objects.files++;
+                        this.currentPool.objects.files++;
                         initializeComponents();
                     }
                 },
