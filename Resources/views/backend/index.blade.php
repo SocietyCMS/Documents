@@ -217,7 +217,7 @@
                     <div class="middle aligned content">
 
                         <h3 class="ui header">@{{ pool.title }}</h3>
-                            <div class="ui tiny blue progress" data-percent="@{{ 100 / pool.quota * pool.quotaUsed }}">
+                            <div class="ui tiny blue progress" data-percent="@{{ Math.min((pool.quotaUsed / pool.quota *100), 100)}}">
                                 <div class="bar"></div>
                                 <div class="label"> @{{ pool.quotaUsed | humanReadableFilesize }} of @{{ pool.quota | humanReadableFilesize }} used</div>
                             </div>
@@ -259,6 +259,12 @@
                     percent: VueInstance.currentPoolQuotaProgrssbar,
                     showActivity: false,
                     autoSuccess: false
+                });
+
+                $('.ui.tiny.progress').progress({
+                    showActivity: false,
+                    autoSuccess: false,
+                    limitValues:false
                 });
 
             }, 100);
@@ -343,10 +349,7 @@
                     return [];
                 },
                 currentPoolQuotaProgrssbar: function() {
-                    if(this.currentPool.quotaUsed > this.currentPool.quota){
-                        return 100;
-                    }
-                    return Math.ceil(this.currentPool.quotaUsed / this.currentPool.quota * 100)
+                    return Math.min(Math.ceil(this.currentPool.quotaUsed / this.currentPool.quota * 100), 100)
                 }
             },
             methods: {
