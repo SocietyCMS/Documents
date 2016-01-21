@@ -3,9 +3,6 @@
 @section('title')
     {{ trans('documents::documents.title.documents') }}
 @endsection
-@section('subTitle')
-    ExamplePage
-@endsection
 
 @section('content')
 
@@ -491,6 +488,9 @@
 
         var dragAndDropModule = new fineUploader.DragAndDrop({
             dropZoneElements: [document.getElementById('file-list-table')],
+            classes: {
+                dropActive: 'blue'
+            },
             callbacks: {
                 processingDroppedFilesComplete: function (files, dropTarget) {
                     fineUploaderBasicInstanceImages.addFiles(files);
