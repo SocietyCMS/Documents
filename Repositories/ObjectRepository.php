@@ -83,4 +83,30 @@ class ObjectRepository extends EloquentHashidsRepository
 
         return $deleted;
     }
+
+    /**
+     * restore a entity in the trash by uid
+     *
+     * @param $uid
+     * @return int
+     */
+    public function restore($uid)
+    {
+        $this->pushCriteria(new withTrashCriteria(true));
+
+        $this->applyScope();
+
+        $_skipPresenter = $this->skipPresenter;
+        $this->skipPresenter(true);
+
+        $model = $this->findByUid($uid);
+        $model->restore();
+
+        $this->skipPresenter($_skipPresenter);
+        $this->resetModel();
+
+        event(new RepositoryEntityDeleted($this, $model));
+
+        return $model;
+    }
 }

@@ -40,6 +40,10 @@ class Pool extends Model
      */
     protected $dates = ['deleted_at'];
 
+    public function getQuotaUsed()
+    {
+       return $this->objects->where('tag', 'file')->sum('fileSize');
+    }
 
     /**
      * Get the files in this pool.

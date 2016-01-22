@@ -41,7 +41,6 @@ class DownloadController extends ApiBaseController
 
     /**
      * @param Request $request
-     * @param         $file
      * @return mixed
      */
     public function download(Request $request)
@@ -52,8 +51,6 @@ class DownloadController extends ApiBaseController
         return (new Response($contents, 200))
             ->header('Content-Type', $file->mimeType)
             ->header('Content-Length', $file->fileSize)
-            ->header('Content-Disposition',"filename='{$file->title}.{$file->fileExtension}'");
-
-        return Response::download($contents,  200, $headers);
+            ->header('Content-Disposition',"attachment; filename='{$file->title}.{$file->fileExtension}'");
     }
 }

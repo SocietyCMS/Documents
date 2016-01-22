@@ -13,7 +13,7 @@ class PoolTransformer extends Fractal\TransformerAbstract
             'title'          => $pool->title,
             'description'    => $pool->description,
             'quota'          => (int)$pool->quota,
-            'quotaUsed'      => $pool->objects->where('tag', 'file')->sum('fileSize'),
+            'quotaUsed'      => $pool->getQuotaUsed(),
             'objects'        => [
                 'total'   => $pool->count(),
                 'files'   => $pool->objects->where('tag', 'file')->count(),

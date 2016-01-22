@@ -95,7 +95,7 @@
                         v-bind:class="{ 'sorted': sortKey == 'tag', 'ascending':sortReverse>0, 'descending':sortReverse<0}">
                         Name
                     </th>
-                    <th class="one wide">
+                    <th class="">
                     </th>
                     <th class="one wide right aligned"
                         v-on:click="sortBy('objectSize')"
@@ -147,8 +147,8 @@
                     </td>
                     <td class="collapsing">
 
-                        <button class="circular ui icon positive button" v-if="object.deleted"><i class="life ring icon"></i></button>
-                        <button class="circular ui icon negative button" v-if="object.deleted"><i class="trash icon"></i></button>
+                        <button class="circular ui icon positive button" v-if="object.deleted" v-on:click="objectRestore(object, $event)"><i class="life ring icon"></i></button>
+                        <button class="circular ui icon negative button" v-if="object.deleted" v-on:click="objectForceDelete(object, $event)"><i class="trash icon"></i></button>
 
 
                         <button class="circular ui icon button" v-if="!object.deleted"><i class="share alternate icon"></i></button>
@@ -217,13 +217,27 @@
                     <div class="middle aligned content">
 
                         <h3 class="ui header">@{{ pool.title }}</h3>
-                            <div class="ui tiny blue progress" data-percent="@{{ Math.min((pool.quotaUsed / pool.quota *100), 100)}}">
-                                <div class="bar"></div>
-                                <div class="label"> @{{ pool.quotaUsed | humanReadableFilesize }} of @{{ pool.quota | humanReadableFilesize }} used</div>
+
+                        <div class="ui tiny blue progress"
+                             data-percent="@{{ Math.min((pool.quotaUsed / pool.quota *100), 100)}}">
+                            <div class="bar"></div>
+                            <div class="label"> @{{ pool.quotaUsed | humanReadableFilesize }}
+                                of @{{ pool.quota | humanReadableFilesize }} used
                             </div>
+                        </div>
                     </div>
 
                 </div>
+
+                <div class="item">
+                    <div class="middle aligned content">
+                        <div class="ui action fluid input">
+                            <input type="text" placeholder="Create new Pool" v-model="createPoolTitle">
+                            <a class="ui button" v-on:click="createPool()">Create</a>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -300,6 +314,7 @@
                 sortKey: 'title',
                 sortReverse: 1,
                 showDeleted:false,
+                createPoolTitle:null
             },
             ready: function () {
 
@@ -483,7 +498,42 @@
                                 this.currentPool.objects.files--;
                             }
                         }
-                        console.log(data, status, request);
+                    }.bind(this)).error(function (data, status, request) {
+                        toastr.error(data.errors[0], 'Error: ' + data.message);
+                    });
+                },
+                objectForceDelete: function (object, event) {
+                    event.preventDefault();
+
+                    var resource = this.$resource('{{apiRoute('v1', 'api.documents.file.forceDestroy', ['pool' => ':pool'])}}');
+                    resource.delete({pool: this.currentPool.uid}, object, function (data, status, request) {
+                        if(status)
+                        {
+                            this.list_folder.$remove(object);
+                        }
+                    }.bind(this)).error(function (data, status, request) {
+                        toastr.error(data.errors[0], 'Error: ' + data.message);
+                    });
+
+
+                },
+                objectRestore: function (object, event) {
+                    event.preventDefault();
+
+                    var resource = this.$resource('{{apiRoute('v1', 'api.documents.file.restore', ['pool' => ':pool'])}}');
+                    resource.save({pool: this.currentPool.uid}, object, function (data, status, request) {
+                        if(status)
+                        {
+                            object.deleted = false;
+
+                            if (object.tag == 'file') {
+                                this.folder_meta.objects.files++;
+                                this.currentPool.objects.files++;
+                            }
+                            this.$nextTick(function () {
+                                initializeComponents()
+                            })
+                        }
                     }.bind(this)).error(function (data, status, request) {
                         toastr.error(data.errors[0], 'Error: ' + data.message);
                     });
@@ -540,7 +590,7 @@
                 fileUploadStart: function () {
                     this.editMode = 'uploadFiles';
                 },
-                fileUploadComplete: function (responseJSON) {
+                fileUploadComplete: function (id, name, responseJSON) {
                     if (responseJSON.data.uid) {
                         this.list_folder.push(responseJSON.data);
                         this.folder_meta.objects.files++;
@@ -559,9 +609,24 @@
                     $('#poolsModal')
                             .modal('show')
                     ;
+                },
+                createPool: function() {
+                    event.preventDefault();
+
+                    if (this.createPoolTitle == null) {
+                        return;
+                    }
+
+                    var resource = this.$resource('{{apiRoute('v1', 'api.documents.pool.store')}}');
+                    resource.save({title: this.createPoolTitle, quota: 1000000}, function (data, status, request) {
+                        this.createPoolText = null;
+                        initializeComponents();
+                    }.bind(this)).error(function (data, status, request) {
+                        toastr.error(data.errors[0], data.message);
+                        this.editMode = null;
+                        this.editObject = null;
+                    }.bind(this));
                 }
-
-
             }
 
         });
@@ -590,7 +655,18 @@
             },
             callbacks: {
                 onComplete: function (id, name, responseJSON) {
-                    VueInstance.fileUploadComplete(responseJSON)
+                    VueInstance.fileUploadComplete(id, name, responseJSON)
+                },
+                onError: function (id, name, errorReason, XMLHttpRequest) {
+                    responseJSON = JSON.parse(XMLHttpRequest.response);
+
+                    if(responseJSON.errors) {
+                        toastr.error(responseJSON.errors[0], responseJSON.message);
+                        this.editMode = null;
+                        this.editObject = null;
+                        return;
+                    }
+
                 },
                 onUpload: function () {
                     VueInstance.fileUploadStart();
