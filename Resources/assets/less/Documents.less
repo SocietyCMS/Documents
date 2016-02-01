@@ -1,4 +1,29 @@
-.ui.list.treeview {
-  display: inline-block;
-  width: auto!important;
+@import (reference) '../../themes/societyadmin/semantic/src/definitions/globals/reset';
+@import (reference) '../../themes/societyadmin/semantic/src/definitions/globals/site';
+
+.ui.segment.fileBrowser {
+  min-height: 20em;
+  padding: 0;
+
+  .treeView {
+    margin: 0;
+    padding: 1em;
+    background-color: @white;
+    overflow: hidden;
+    border-right: 1px solid @lightGrey;
+
+    .list.pool {
+      margin: 0;
+    }
+  }
+}
+
+
+.ui.menu.fileMenu {
+   .item>.button {
+     margin: -.5em .25em;
+   }
+  .ui.breadcrumb.item:before {
+    display: none;
+  }
 }

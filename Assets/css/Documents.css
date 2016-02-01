@@ -1,6 +1,22 @@
-.ui.list.treeview {
-  display: inline-block;
-  width: auto!important;
+.ui.segment.fileBrowser {
+  min-height: 20em;
+  padding: 0;
+}
+.ui.segment.fileBrowser .treeView {
+  margin: 0;
+  padding: 1em;
+  background-color: #FFFFFF;
+  overflow: hidden;
+  border-right: 1px solid #DCDDDE;
+}
+.ui.segment.fileBrowser .treeView .list.pool {
+  margin: 0;
+}
+.ui.menu.fileMenu .item > .button {
+  margin: -0.5em 0.25em;
+}
+.ui.menu.fileMenu .ui.breadcrumb.item:before {
+  display: none;
 }
 
 /*# sourceMappingURL=Documents.css.map */
