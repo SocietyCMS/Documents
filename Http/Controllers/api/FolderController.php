@@ -59,7 +59,7 @@ class FolderController extends ApiBaseController
         $objects = $this->repository->paginate(100);
 
         $meta = [
-            'parent_uid' => $request->input('parent_uid', null),
+            'parent_uid' => $parent?$parent->parent_uid:null,
             'with_trash' => (bool)$request->input('with_trash', false),
             'objects'   => [
                 'total' => $objects->count(),
@@ -88,7 +88,7 @@ class FolderController extends ApiBaseController
         $folder = $this->repository->create([
             'title'       => $request->title,
             'description' => $request->description,
-            'parent_uid'  => $this->getNullFromEmpty($request->parent_uid),
+            'parent_uid'  => $this->cleanParameters($request->parent_uid),
             'shared'      => $request->shared,
             'user_id'     => $this->user()->id,
             'pool_uid'    => $request->pool,
@@ -121,7 +121,7 @@ class FolderController extends ApiBaseController
      */
     private function getParent(Request $request)
     {
-        $parent_uid = $this->getNullFromEmpty($request->parent_uid);
+        $parent_uid = $this->cleanParameters($request->parent_uid);
         if (!is_null($parent_uid)) {
             return $this->repository->findByUid($parent_uid);
 
@@ -133,8 +133,11 @@ class FolderController extends ApiBaseController
      * @param $value
      * @return null
      */
-    private function getNullFromEmpty($value)
+    private function cleanParameters($parameter)
     {
-        return empty($value) ? null : $value;
+        if(empty($parameter) || $parameter=='null'){
+            return null;
+        }
+        return $parameter;
     }
 }

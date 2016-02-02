@@ -29,17 +29,17 @@
 </div>
 
 <div class="item">
-    <button class="circular ui icon basic button">
+    <div class="circular ui icon basic button" v-on:click="redirectBack">
         <i class="chevron left icon button"></i>
-    </button>
+    </div>
 
-    <button class="circular ui icon basic button">
+    <div class="circular ui icon basic button" v-on:click="redirectForward">
         <i class="chevron right icon button"></i>
-    </button>
+    </div>
 
-    <button class="circular ui icon basic button">
+    <div class="circular ui icon basic button" v-on:click="redirectUp">
         <i class="level up icon button"></i>
-    </button>
+    </div>
 </div>
 
 <div class="ui breadcrumb item">

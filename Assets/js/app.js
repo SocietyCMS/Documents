@@ -1,71 +1,45 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var _poolTreeview = require('./components/poolTreeview.vue');
+var _main = require('./extensions/main.js');
 
-var _poolTreeview2 = _interopRequireDefault(_poolTreeview);
+var _main2 = _interopRequireDefault(_main);
+
+var _view = require('./extensions/view.js');
+
+var _view2 = _interopRequireDefault(_view);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// Define some components
-var Foo = Vue.extend({
-    template: '<p>This is foo!</p>'
-});
+var App = Vue.extend(_main2.default);
 
-var Bar = Vue.extend({
-    template: '<p>This is bar!</p>'
-});
+var View = Vue.extend(_view2.default);
 
-var App = Vue.extend({
-    data: function data() {
-        return { pools: [] };
-    },
-
-    components: { pooltreeview: _poolTreeview2.default },
-
-    ready: function ready() {
-        var resource = this.$resource(resourceDocumentsPoolIndex);
-        // save item
-        resource.get({}).then(function (response) {
-            this.pools = response.data.data;
-            this.selectFirstPool();
-        }.bind(this), function (response) {
-            toastr.error(response.data.message, 'Error: ' + response.data.status_code);
-        }.bind(this));
-    },
-
-    methods: {
-        selectFirstPool: function selectFirstPool() {
-            this.selectedPool = this.pools[1];
-        }
-    }
-});
-
-// Create a router instance.
-// You can pass in additional options here, but let's
-// keep it simple for now.
 var router = new VueRouter();
 
-// Define some routes.
-// Each route should map to a component. The "component" can
-// either be an actual component constructor created via
-// Vue.extend(), or just a component options object.
-// We'll talk about nested routes later.
 router.map({
-    '/:pool': {
-        component: Foo
-    },
-    '/bar': {
-        component: Bar
+    '/:pool/*parent_uid': {
+        name: 'pool',
+        component: View
     }
 });
 
-// Now we can start the app!
-// The router will create an instance of App and mount to
-// the element matching the selector #app.
 router.start(App, '#societyAdmin');
 
-},{"./components/poolTreeview.vue":2}],2:[function(require,module,exports){
+},{"./extensions/main.js":4,"./extensions/view.js":5}],2:[function(require,module,exports){
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n<div class=\"ui list\">\n    <div class=\"item\" v-for=\"object in objects\">\n\n        <a v-link=\"{ name: 'pool', params: { pool: pool.uid, parent_uid: object.uid }}\" class=\"header\" v-if=\"object.tag=='folder'\">{{ object.title }}\n        </a>\n        <span v-else=\"\">{{ object.title }}</span>\n    </div>\n</div>\n\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/home/ralph/web/societycms.dev/modules/Documents/Resources/assets/js/components/list.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":8,"vue-hot-reload-api":7}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -75,7 +49,7 @@ exports.default = {
     props: ['pool', 'selected']
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"ui pool list\">\n    <div class=\"item\">\n        <i class=\"home icon\"></i>\n        <i class=\"minus square outline icon\" v-if=\"selected == pool\"></i>\n        <i class=\"plus square outline icon\" v-else=\"\"></i>\n\n        <div class=\"content\">\n\n            <a v-link=\"{ path: pool.uid }\" class=\"header\">{{pool.title}}</a>\n\n              <!--\n              <div class=\"list\">\n                <div class=\"item\" v-for=\"folder in pool.file_list\">\n                    <i class=\"folder icon\"></i>\n\n                    <div class=\"content\">\n                        <div class=\"header\">{{folder.title}}</div>\n                    </div>\n                </div>\n            </div>\n            -->\n        </div>\n    </div>\n</div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"ui pool list\">\n    <div class=\"item\">\n        <i class=\"home icon\"></i>\n\n           <i class=\"minus square outline icon\" v-if=\"selected == pool\"></i>\n           <i class=\"plus square outline icon\" v-else=\"\"></i>\n\n       <div class=\"content\">\n\n           <a v-link=\"{ name: 'pool', params: { pool: pool.uid, parent_uid: 'null'}}\" class=\"header\">{{pool.title}}</a>\n\n             <!--\n             <div class=\"list\">\n               <div class=\"item\" v-for=\"folder in pool.file_list\">\n                   <i class=\"folder icon\"></i>\n\n                   <div class=\"content\">\n                       <div class=\"header\">{{folder.title}}</div>\n                   </div>\n               </div>\n           </div>\n           -->\n        </div>\n    </div>\n</div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -87,7 +61,123 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":5,"vue-hot-reload-api":4}],3:[function(require,module,exports){
+},{"vue":8,"vue-hot-reload-api":7}],4:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _poolTreeview = require('../components/poolTreeview.vue');
+
+var _poolTreeview2 = _interopRequireDefault(_poolTreeview);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+    data: function data() {
+        return {
+            pools: [],
+            objects: [],
+            meta: null,
+            selectedPool: null,
+            selectedParent: null
+        };
+    },
+
+    components: { pooltreeview: _poolTreeview2.default },
+    watch: {
+        '$route.params': function $routeParams() {
+            this.selectPool();
+            this.selectParent();
+        }
+    },
+    ready: function ready() {
+        this.requestPoolIndex();
+    },
+
+    methods: {
+        requestPoolIndex: function requestPoolIndex() {
+            var resource = this.$resource(resourceDocumentsPoolIndex);
+            resource.get({}).then(function (response) {
+                this.pools = response.data.data;
+                this.selectPool();
+                this.selectParent();
+            }.bind(this), function (response) {
+                toastr.error(response.data.message, 'Error: ' + response.data.status_code);
+            }.bind(this));
+        },
+        requestObjectIndex: function requestObjectIndex() {
+            var resource = this.$resource(resourceDocumentsPoolListFolder);
+            resource.get({ uid: this.selectedPool.uid }, { parent_uid: this.selectedParent }).then(function (response) {
+                this.objects = response.data.data;
+                this.meta = response.data.meta;
+            }.bind(this), function (response) {
+                toastr.error(response.data.message, 'Error: ' + response.data.status_code);
+            }.bind(this));
+        },
+        redirectBack: function redirectBack() {
+            this.$route.router.go(window.history.back());
+        },
+        redirectForward: function redirectForward() {
+            this.$route.router.go(window.history.forward());
+        },
+        redirectUp: function redirectUp() {
+            this.$route.router.go({
+                name: 'pool',
+                params: { pool: this.selectedPool.uid, parent_uid: this.meta.parent_uid ? this.meta.parent_uid : 'null' }
+            });
+        },
+        selectPool: function selectPool() {
+
+            if (this.$route.params && this.$route.params.pool) {
+
+                var uid = this.$route.params.pool;
+                var result = $.grep(this.pools, function (e) {
+                    return e.uid == uid;
+                });
+                if (result.length == 0) {
+                    this.selectedPool = null;
+                } else if (result.length == 1) {
+                    this.selectedPool = result[0];
+                } else {
+                    this.selectedPool = result[0];
+                }
+            } else {
+                this.selectedPool = this.pools[0];
+            }
+        },
+        selectParent: function selectParent() {
+            if (this.$route.params && this.$route.params.parent_uid) {
+                this.selectedParent = this.$route.params.parent_uid;
+            }
+
+            this.requestObjectIndex();
+        }
+    }
+};
+
+},{"../components/poolTreeview.vue":3}],5:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _list = require('../components/list.vue');
+
+var _list2 = _interopRequireDefault(_list);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+    data: function data() {},
+
+    template: _list2.default.template,
+    props: ['pool', 'objects']
+};
+
+},{"../components/list.vue":2}],6:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -180,7 +270,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],4:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var Vue // late bind
 var map = Object.create(null)
 var shimmed = false
@@ -480,7 +570,7 @@ function format (id) {
   return id.match(/[^\/]+\.vue$/)[0]
 }
 
-},{}],5:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function (process,global){
 /*!
  * Vue.js v1.0.16
@@ -10075,6 +10165,6 @@ if (devtools) {
 
 module.exports = Vue;
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":3}]},{},[1]);
+},{"_process":6}]},{},[1]);
 
 //# sourceMappingURL=app.js.map

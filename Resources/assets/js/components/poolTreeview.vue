@@ -2,24 +2,25 @@
     <div class="ui pool list">
         <div class="item">
             <i class="home icon"></i>
-            <i class="minus square outline icon" v-if="selected == pool"></i>
-            <i class="plus square outline icon" v-else></i>
 
-            <div class="content">
+               <i class="minus square outline icon" v-if="selected == pool"></i>
+               <i class="plus square outline icon" v-else></i>
 
-                <a v-link="{ path: pool.uid }" class="header">{{pool.title}}</a>
+           <div class="content">
 
-                  <!--
-                  <div class="list">
-                    <div class="item" v-for="folder in pool.file_list">
-                        <i class="folder icon"></i>
+               <a v-link="{ name: 'pool', params: { pool: pool.uid, parent_uid: 'null'}}" class="header">{{pool.title}}</a>
 
-                        <div class="content">
-                            <div class="header">{{folder.title}}</div>
-                        </div>
-                    </div>
-                </div>
-                -->
+                 <!--
+                 <div class="list">
+                   <div class="item" v-for="folder in pool.file_list">
+                       <i class="folder icon"></i>
+
+                       <div class="content">
+                           <div class="header">{{folder.title}}</div>
+                       </div>
+                   </div>
+               </div>
+               -->
             </div>
         </div>
     </div>
