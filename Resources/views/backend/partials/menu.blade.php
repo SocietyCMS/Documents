@@ -42,14 +42,7 @@
     </div>
 </div>
 
-<div class="ui breadcrumb item">
-    <a class="section">Home</a>
-    <div class="divider"> / </div>
-    <a class="section">Store</a>
-    <div class="divider"> / </div>
-    <div class="active section">T-Shirt</div>
-</div>
-
+<breadcrumb :pool="selectedPool" :meta="meta"></breadcrumb>
 
 <div class="right menu">
     <div class="item">

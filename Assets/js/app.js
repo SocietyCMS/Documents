@@ -19,15 +19,58 @@ var router = new VueRouter();
 
 router.map({
     '/:pool/*parent_uid': {
-        name: 'pool',
+        name: 'path',
         component: View
     }
 });
 
 router.start(App, '#societyAdmin');
 
-},{"./extensions/main.js":4,"./extensions/view.js":5}],2:[function(require,module,exports){
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n<div class=\"ui list\">\n    <div class=\"item\" v-for=\"object in objects\">\n\n        <a v-link=\"{ name: 'pool', params: { pool: pool.uid, parent_uid: object.uid }}\" class=\"header\" v-if=\"object.tag=='folder'\">{{ object.title }}\n        </a>\n        <span v-else=\"\">{{ object.title }}</span>\n    </div>\n</div>\n\n"
+},{"./extensions/main.js":5,"./extensions/view.js":6}],2:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = {
+    props: ['pool', 'meta'],
+    computed: {
+        containing_ns_path: function containing_ns_path() {
+            if (this.meta && this.meta.containing_ns_path && this.meta.containing_fq_uid) {
+
+                var currentPath = this.meta.containing_ns_path.split('/');
+                var currentPathUid = this.meta.containing_fq_uid.split(':');
+
+                var returnObject = [];
+
+                currentPath.forEach(function (element, index, array) {
+                    returnObject.push({
+                        'uid': currentPathUid[index],
+                        'title': element
+                    });
+                });
+
+                return returnObject;
+            }
+            return [];
+        }
+    }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n<div class=\"ui breadcrumb item\">\n\n    <a class=\"section\" v-link=\"{ name: 'path', params: { pool: pool.uid, parent_uid: 'null'}}\" v-if=\"pool\">\n        <i class=\"home icon\"></i>\n        {{ pool.title }}\n    </a>\n\n    <template v-for=\"item in containing_ns_path\">\n        <div class=\"divider\"> / </div>\n        <a class=\"ui section text\" v-link=\"{ name: 'path', params: { pool: pool.uid, parent_uid: item.uid}}\" v-bind:class=\"{ 'black': meta.patent_uid == item.uid }\">{{ item.title }}</a>\n    </template>\n\n    <div class=\"divider\"> / </div>\n\n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  var id = "/home/ralph/web/societycms.dev/modules/Documents/Resources/assets/js/components/breadcrumb.vue"
+  if (!module.hot.data) {
+    hotAPI.createRecord(id, module.exports)
+  } else {
+    hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":9,"vue-hot-reload-api":8}],3:[function(require,module,exports){
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n<div class=\"ui list\">\n    <div class=\"item\" v-for=\"object in objects\">\n\n        <a v-link=\"{ name: 'path', params: { pool: pool.uid, parent_uid: object.uid }}\" class=\"header\" v-if=\"object.tag=='folder'\">{{ object.title }}\n        </a>\n        <span v-else=\"\">{{ object.title }}</span>\n    </div>\n</div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -39,7 +82,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":8,"vue-hot-reload-api":7}],3:[function(require,module,exports){
+},{"vue":9,"vue-hot-reload-api":8}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -49,28 +92,32 @@ exports.default = {
     props: ['pool', 'selected']
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"ui pool list\">\n    <div class=\"item\">\n        <i class=\"home icon\"></i>\n\n           <i class=\"minus square outline icon\" v-if=\"selected == pool\"></i>\n           <i class=\"plus square outline icon\" v-else=\"\"></i>\n\n       <div class=\"content\">\n\n           <a v-link=\"{ name: 'pool', params: { pool: pool.uid, parent_uid: 'null'}}\" class=\"header\">{{pool.title}}</a>\n\n             <!--\n             <div class=\"list\">\n               <div class=\"item\" v-for=\"folder in pool.file_list\">\n                   <i class=\"folder icon\"></i>\n\n                   <div class=\"content\">\n                       <div class=\"header\">{{folder.title}}</div>\n                   </div>\n               </div>\n           </div>\n           -->\n        </div>\n    </div>\n</div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"ui pool list\">\n    <div class=\"item\">\n        <i class=\"home icon\"></i>\n\n           <i class=\"minus square outline icon\" v-if=\"selected == pool\"></i>\n           <i class=\"plus square outline icon\" v-else=\"\"></i>\n\n       <div class=\"content\">\n\n           <a v-link=\"{ name: 'path', params: { pool: pool.uid, parent_uid: 'null'}}\" class=\"header\">{{pool.title}}</a>\n\n             <!--\n             <div class=\"list\">\n               <div class=\"item\" v-for=\"folder in pool.file_list\">\n                   <i class=\"folder icon\"></i>\n\n                   <div class=\"content\">\n                       <div class=\"header\">{{folder.title}}</div>\n                   </div>\n               </div>\n           </div>\n           -->\n        </div>\n    </div>\n</div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/home/ralph/web/societycms.dev/modules/Documents/Resources/assets/js/components/poolTreeview.vue"
+  var id = "/home/ralph/web/societycms.dev/modules/Documents/Resources/assets/js/components/pooltree.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":8,"vue-hot-reload-api":7}],4:[function(require,module,exports){
+},{"vue":9,"vue-hot-reload-api":8}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _poolTreeview = require('../components/poolTreeview.vue');
+var _pooltree = require('../components/pooltree.vue');
 
-var _poolTreeview2 = _interopRequireDefault(_poolTreeview);
+var _pooltree2 = _interopRequireDefault(_pooltree);
+
+var _breadcrumb = require('../components/breadcrumb.vue');
+
+var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -85,7 +132,7 @@ exports.default = {
         };
     },
 
-    components: { pooltreeview: _poolTreeview2.default },
+    components: { pooltree: _pooltree2.default, breadcrumb: _breadcrumb2.default },
     watch: {
         '$route.params': function $routeParams() {
             this.selectPool();
@@ -157,7 +204,7 @@ exports.default = {
     }
 };
 
-},{"../components/poolTreeview.vue":3}],5:[function(require,module,exports){
+},{"../components/breadcrumb.vue":2,"../components/pooltree.vue":4}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -177,7 +224,7 @@ exports.default = {
     props: ['pool', 'objects']
 };
 
-},{"../components/list.vue":2}],6:[function(require,module,exports){
+},{"../components/list.vue":3}],7:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -270,7 +317,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var Vue // late bind
 var map = Object.create(null)
 var shimmed = false
@@ -570,7 +617,7 @@ function format (id) {
   return id.match(/[^\/]+\.vue$/)[0]
 }
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function (process,global){
 /*!
  * Vue.js v1.0.16
@@ -10165,6 +10212,6 @@ if (devtools) {
 
 module.exports = Vue;
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":6}]},{},[1]);
+},{"_process":7}]},{},[1]);
 
 //# sourceMappingURL=app.js.map

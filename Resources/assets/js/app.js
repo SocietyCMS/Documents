@@ -10,7 +10,7 @@ var router = new VueRouter();
 
 router.map({
     '/:pool/*parent_uid': {
-        name: 'pool',
+        name: 'path',
         component: View
     }
 });

@@ -1,3 +1,3 @@
 <div class="">
-    <pooltreeview :pool="pool" :selected="selectedPool" v-for="pool in pools"></pooltreeview>
+    <pooltree :pool="pool" :selected="selectedPool" v-for="pool in pools"></pooltree>
 </div>

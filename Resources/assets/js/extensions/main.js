@@ -1,5 +1,6 @@
 
-import pooltreeview from '../components/poolTreeview.vue';
+import pooltree from '../components/pooltree.vue';
+import breadcrumb from '../components/breadcrumb.vue';
 
 export default {
     data() {
@@ -11,7 +12,7 @@ export default {
             selectedParent: null,
         }
     },
-    components: {pooltreeview},
+    components: {pooltree,breadcrumb},
     watch: {
         '$route.params': function () {
             this.selectPool()
