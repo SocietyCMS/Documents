@@ -9,7 +9,7 @@ export default {
             objects: [],
             meta: null,
             selectedPool:null,
-            selectedParent: null,
+            selectedParent: null
         }
     },
     components: {pooltree,breadcrumb},
@@ -52,7 +52,7 @@ export default {
         },
         redirectUp() {
             this.$route.router.go({
-                name: 'pool',
+                name: 'path',
                 params: { pool: this.selectedPool.uid, parent_uid: this.meta.parent_uid?this.meta.parent_uid:'null' }
             })
         },

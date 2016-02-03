@@ -16,6 +16,11 @@
       margin: 0;
     }
   }
+
+  .fileView {
+    padding: 0;
+  }
+
 }
 
 
@@ -25,5 +30,20 @@
    }
   .ui.breadcrumb.item:before {
     display: none;
+  }
+}
+
+#file-list-table {
+  border:none;
+  border-radius:0;
+
+  .object {
+    .ui.text {
+      display: inline-flex;
+    }
+
+    .ui.input {
+      min-width: 50%;
+    }
   }
 }

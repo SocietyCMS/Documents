@@ -9,8 +9,7 @@
 
         <template v-for="item in containing_ns_path">
             <div class="divider"> / </div>
-            <a class="ui section text" v-link="{ name: 'path', params: { pool: pool.uid, parent_uid: item.uid}}"
-               v-bind:class="{ 'black': meta.patent_uid == item.uid }">{{ item.title }}</a>
+            <a class="ui section text" v-link="{ name: 'path', params: { pool: pool.uid, parent_uid: item.uid}}">{{ item.title }}</a>
         </template>
 
         <div class="divider"> / </div>

@@ -17,7 +17,7 @@
     <div class="ui bottom attached segment grid fileBrowser">
 
             <div class="two wide column treeView"> @include('documents::backend.partials.treeview')</div>
-            <div class="fourteen wide column">@include('documents::backend.partials.multiview')</div>
+            <div class="fourteen wide column fileView">@include('documents::backend.partials.multiview')</div>
     </div>
 
 
@@ -31,6 +31,7 @@
 
         var resourceDocumentsPoolListFolder = '{{apiRoute('v1', 'api.documents.list_folder', ['pool' => ':uid'])}}';
 
+        var jwtoken = '{{$jwtoken}}'
     </script>
     <script src="{{\Pingpong\Modules\Facades\Module::asset('documents:js/app.js')}}"></script>
 
