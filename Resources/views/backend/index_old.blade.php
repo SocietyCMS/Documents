@@ -18,7 +18,6 @@
                v-bind:class="{ 'black': currentFolder == item.uid }">@{{ item.title }}</a>
         </template>
 
-
         <i class="right angle icon divider"></i>
 
         <div class="ui icon top left pointing dropdown button" v-bind:class="{'active':editMode == 'createFolder'}">
@@ -35,7 +34,6 @@
     </div>
 
     <div class="ui divider"></div>
-
 
     <div class="ui grid">
         <div class="four wide column">
@@ -85,7 +83,6 @@
                 </div>
                 <div class="label">Uploading Files</div>
             </div>
-
 
             <table class="ui selectable table" id="file-list-table">
                 <thead>

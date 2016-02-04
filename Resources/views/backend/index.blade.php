@@ -17,7 +17,7 @@
     <div class="ui bottom attached segment grid fileBrowser">
 
             <div class="two wide column treeView"> @include('documents::backend.partials.treeview')</div>
-            <div class="fourteen wide column fileView">@include('documents::backend.partials.multiview')</div>
+            <div class="fourteen wide column fileView" id="fileView">@include('documents::backend.partials.multiview')</div>
     </div>
 
 

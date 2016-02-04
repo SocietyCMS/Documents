@@ -44,18 +44,21 @@ export default {
             }.bind(this));
         },
 
-        redirectBack() {
-            this.$route.router.go(window.history.back())
+        redirectBack: function(){
+            return this.$route.router.go(window.history.back());
         },
-        redirectForward() {
-            this.$route.router.go(window.history.forward())
+
+        redirectForward: function(){
+            return this.$route.router.go(window.history.forward())
         },
-        redirectUp() {
-            this.$route.router.go({
+
+        redirectUp: function(){
+            return this.$route.router.go({
                 name: 'path',
                 params: { pool: this.selectedPool.uid, parent_uid: this.meta.parent_uid?this.meta.parent_uid:'null' }
             })
         },
+
         selectPool() {
 
             if(this.$route.params && this.$route.params.pool) {

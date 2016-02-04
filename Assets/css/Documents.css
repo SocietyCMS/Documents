@@ -25,6 +25,10 @@
   border: none;
   border-radius: 0;
 }
+#file-list-table tbody tr td.selectable:hover {
+  background: none!important;
+  color: rgba(0, 0, 0, 0.95) !important;
+}
 #file-list-table .object .ui.text {
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;

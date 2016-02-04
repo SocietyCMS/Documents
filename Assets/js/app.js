@@ -9,6 +9,8 @@ var _view = require('./extensions/view.js');
 
 var _view2 = _interopRequireDefault(_view);
 
+var _upload = require('./extensions/upload.js');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 Vue.filter('advancedSort', function (arr, sortKey, reverse) {
@@ -32,7 +34,10 @@ router.map({
 
 router.start(App, '#societyAdmin');
 
-},{"./extensions/main.js":5,"./extensions/view.js":6}],2:[function(require,module,exports){
+(0, _upload.dragAndDropModule)();
+(0, _upload.fineUploaderBasicInstanceImages)(App);
+
+},{"./extensions/main.js":5,"./extensions/upload.js":6,"./extensions/view.js":7}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -75,8 +80,8 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":9,"vue-hot-reload-api":8}],3:[function(require,module,exports){
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n\n<table class=\"ui selectable table\" id=\"file-list-table\">\n    <thead>\n    <tr>\n        <th class=\"therteen wide filename\" v-on:click=\"sortBy('title')\" v-bind:class=\"{ 'sorted': sortKey == 'tag', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Title\n        </th>\n        <th class=\"\">\n        </th>\n        <th class=\"one wide right aligned\" v-on:click=\"sortBy('objectSize')\" v-bind:class=\"{ 'sorted': sortKey == 'objectSize', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Size\n        </th>\n        <th class=\"two wide right aligned\" v-on:click=\"sortBy('created_at.timestamp')\" v-bind:class=\"{ 'sorted': sortKey == 'created_at.timestamp', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Modified\n        </th>\n    </tr>\n    </thead>\n    <tbody>\n\n    <tr class=\"object\" v-bind:class=\"{'negative':object.deleted}\" v-for=\"object in objects | filterBy filterKey | advancedSort sortKey sortReverse\">\n        <td class=\"selectable\">\n            <a href=\"\" v-on:click=\"objectOpen(object, $event)\">\n                <i v-bind:class=\"object.mimeType | semanticFileTypeClass\" class=\"icon\"></i>\n\n                <div class=\"ui text\" v-if=\"editObject != object\">{{ object.title }} <span class=\"ui gray text\" v-if=\"object.fileExtension\">.{{ object.fileExtension }}</span>\n                </div>\n                <div class=\"ui input\" v-else=\"\">\n                    <input type=\"text\" v-model=\"object.title\" v-on:blur=\"objectBlurEdit(object, $event)\" v-on:keydown=\"objectKeydownEdit(object, $event)\" id=\"objectEditInput-{{object.uid}}\">\n                </div>\n\n            </a>\n        </td>\n        <td class=\"collapsing\">\n\n            <button class=\"circular ui icon positive button\" v-if=\"object.deleted\" v-on:click=\"objectRestore(object, $event)\"><i class=\"life ring icon\"></i></button>\n            <button class=\"circular ui icon negative button\" v-if=\"object.deleted\" v-on:click=\"objectForceDelete(object, $event)\"><i class=\"trash icon\"></i></button>\n\n            <button class=\"circular ui icon button\" v-if=\"!object.deleted\"><i class=\"share alternate icon\"></i></button>\n\n            <div class=\"ui top left pointing dropdown\" v-if=\"!object.deleted\">\n                <button class=\"circular ui icon button\"><i class=\"ellipsis horizontal icon\"></i></button>\n\n                <div class=\"menu\">\n                    <div class=\"item\" v-on:click=\"objectOpen(object, $event)\">\n                        Open...\n                    </div>\n                    <div class=\"item\" v-on:click=\"objectEdit(object, $event)\">\n                        Rename\n                    </div>\n                    <div class=\"item\">\n                        <i class=\"folder icon\"></i>\n                        Move to folder\n                    </div>\n                    <div class=\"item\" v-on:click=\"objectDelete(object, $event)\">\n                        <i class=\"trash icon\"></i>\n                        Move to trash\n                    </div>\n                </div>\n            </div>\n\n        </td>\n        <td class=\"right aligned collapsing\" v-if=\"object.tag == 'file'\">{{ object.objectSize | humanReadableFilesize }}</td>\n        <td class=\"right aligned collapsing\" v-if=\"object.tag == 'folder'\">-</td>\n        <td class=\"right aligned collapsing\">{{ object.created_at.diffForHumans }}</td>\n    </tr>\n    </tbody>\n    <tfoot>\n    <tr>\n        <th><span v-if=\"folder_meta\">{{ folder_meta.objects.folders }}\n                        folders and {{ folder_meta.objects.files }} files</span></th>\n        <th></th>\n        <th class=\"right aligned collapsing\"></th>\n        <th></th>\n    </tr>\n    </tfoot>\n</table>\n\n"
+},{"vue":10,"vue-hot-reload-api":9}],3:[function(require,module,exports){
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\n\n<table class=\"ui selectable table\" id=\"file-list-table\">\n    <thead>\n    <tr>\n        <th class=\"therteen wide filename\" v-on:click=\"sortBy('title')\" v-bind:class=\"{ 'sorted': sortKey == 'tag', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Title\n        </th>\n        <th class=\"\">\n        </th>\n        <th class=\"one wide right aligned\" v-on:click=\"sortBy('objectSize')\" v-bind:class=\"{ 'sorted': sortKey == 'objectSize', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Size\n        </th>\n        <th class=\"two wide right aligned\" v-on:click=\"sortBy('created_at.timestamp')\" v-bind:class=\"{ 'sorted': sortKey == 'created_at.timestamp', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Modified\n        </th>\n    </tr>\n    </thead>\n    <tbody>\n\n    <tr class=\"object\" v-bind:class=\"{'negative':object.deleted}\" v-for=\"object in objects | filterBy filterKey | advancedSort sortKey sortReverse\">\n        <td class=\"selectable\">\n            <a href=\"\" v-on:click=\"objectOpen(object, $event)\">\n                <i v-bind:class=\"object.mimeType | semanticFileTypeClass\" class=\"icon\"></i>\n\n                <div class=\"ui text\" v-if=\"editObject != object\">{{ object.title }} <span class=\"ui gray text\" v-if=\"object.fileExtension\">.{{ object.fileExtension }}</span>\n                </div>\n                <div class=\"ui input\" v-else=\"\">\n                    <input type=\"text\" v-model=\"object.title\" v-on:blur=\"objectBlurEdit(object, $event)\" v-on:keydown=\"objectKeydownEdit(object, $event)\" id=\"objectEditInput-{{object.uid}}\">\n                </div>\n\n            </a>\n        </td>\n        <td class=\"collapsing\">\n\n            <button class=\"circular ui icon positive button\" v-if=\"object.deleted\" v-on:click=\"objectRestore(object, $event)\"><i class=\"life ring icon\"></i></button>\n            <button class=\"circular ui icon negative button\" v-if=\"object.deleted\" v-on:click=\"objectForceDelete(object, $event)\"><i class=\"trash icon\"></i></button>\n\n            <button class=\"circular ui icon button\" v-if=\"!object.deleted\"><i class=\"share alternate icon\"></i></button>\n\n            <div class=\"ui top left pointing dropdown\" v-if=\"!object.deleted\">\n                <button class=\"circular ui icon button\"><i class=\"ellipsis horizontal icon\"></i></button>\n\n                <div class=\"menu\">\n                    <div class=\"item\" v-on:click=\"objectOpen(object, $event)\">\n                        Open...\n                    </div>\n                    <div class=\"item\" v-on:click=\"objectEdit(object, $event)\">\n                        Rename\n                    </div>\n                    <div class=\"item\">\n                        <i class=\"folder icon\"></i>\n                        Move to folder\n                    </div>\n                    <div class=\"item\" v-on:click=\"objectDelete(object, $event)\">\n                        <i class=\"trash icon\"></i>\n                        Move to trash\n                    </div>\n                </div>\n            </div>\n\n        </td>\n        <td class=\"right aligned collapsing\" v-if=\"object.tag == 'file'\">{{ object.objectSize | humanReadableFilesize }}</td>\n        <td class=\"right aligned collapsing\" v-if=\"object.tag == 'folder'\">-</td>\n        <td class=\"right aligned collapsing\">{{ object.created_at.diffForHumans }}</td>\n    </tr>\n    </tbody>\n</table>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -88,7 +93,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":9,"vue-hot-reload-api":8}],4:[function(require,module,exports){
+},{"vue":10,"vue-hot-reload-api":9}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -98,7 +103,7 @@ exports.default = {
     props: ['pool', 'selected']
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"ui pool list\">\n    <div class=\"item\">\n        <i class=\"home icon\"></i>\n\n           <i class=\"minus square outline icon\" v-if=\"selected == pool\"></i>\n           <i class=\"plus square outline icon\" v-else=\"\"></i>\n\n       <div class=\"content\">\n\n           <a v-link=\"{ name: 'path', params: { pool: pool.uid, parent_uid: 'null'}}\" class=\"header\">{{pool.title}}</a>\n\n             <!--\n             <div class=\"list\">\n               <div class=\"item\" v-for=\"folder in pool.file_list\">\n                   <i class=\"folder icon\"></i>\n\n                   <div class=\"content\">\n                       <div class=\"header\">{{folder.title}}</div>\n                   </div>\n               </div>\n           </div>\n           -->\n        </div>\n    </div>\n</div>\n\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"ui pool list\">\n    <div class=\"item\">\n        <i class=\"home icon\"></i>\n\n           <i class=\"minus square outline icon\" v-if=\"selected == pool\"></i>\n           <i class=\"plus square outline icon\" v-else=\"\"></i>\n\n       <div class=\"content\">\n\n           <a v-link=\"{ name: 'path', params: { pool: pool.uid, parent_uid: 'null'}}\" class=\"header\">{{pool.title}}</a>\n        </div>\n    </div>\n</div>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -110,7 +115,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update(id, module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":9,"vue-hot-reload-api":8}],5:[function(require,module,exports){
+},{"vue":10,"vue-hot-reload-api":9}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -169,18 +174,22 @@ exports.default = {
                 toastr.error(response.data.message, 'Error: ' + response.data.status_code);
             }.bind(this));
         },
+
         redirectBack: function redirectBack() {
-            this.$route.router.go(window.history.back());
+            return this.$route.router.go(window.history.back());
         },
+
         redirectForward: function redirectForward() {
-            this.$route.router.go(window.history.forward());
+            return this.$route.router.go(window.history.forward());
         },
+
         redirectUp: function redirectUp() {
-            this.$route.router.go({
+            return this.$route.router.go({
                 name: 'path',
                 params: { pool: this.selectedPool.uid, parent_uid: this.meta.parent_uid ? this.meta.parent_uid : 'null' }
             });
         },
+
         selectPool: function selectPool() {
 
             if (this.$route.params && this.$route.params.pool) {
@@ -211,6 +220,68 @@ exports.default = {
 };
 
 },{"../components/breadcrumb.vue":2,"../components/pooltree.vue":4}],6:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.dragAndDropModule = dragAndDropModule;
+exports.fineUploaderBasicInstanceImages = fineUploaderBasicInstanceImages;
+function dragAndDropModule() {
+
+    return new fineUploader.DragAndDrop({
+        dropZoneElements: [document.getElementById('fileView')],
+        classes: {
+            dropActive: 'blue'
+        },
+        callbacks: {
+            processingDroppedFilesComplete: function processingDroppedFilesComplete(files, dropTarget) {
+                fineUploaderBasicInstanceImages().addFiles(files);
+            }
+        }
+    });
+};
+
+function fineUploaderBasicInstanceImages(VueInstance) {
+    return new fineUploader.FineUploaderBasic({
+        button: document.getElementById('uploadFileButton'),
+        request: {
+            endpoint: '',
+            inputName: 'data-binary',
+            customHeaders: {
+                "Authorization": "Bearer {{$jwtoken}}"
+            }
+        },
+        callbacks: {
+            onComplete: function onComplete(id, name, responseJSON) {
+                VueInstance.fileUploadComplete(id, name, responseJSON);
+            },
+            onError: function onError(id, name, errorReason, XMLHttpRequest) {
+                responseJSON = JSON.parse(XMLHttpRequest.response);
+
+                if (responseJSON.errors) {
+                    toastr.error(responseJSON.errors[0], responseJSON.message);
+                    this.editMode = null;
+                    this.editObject = null;
+                    return;
+                }
+            },
+            onUpload: function onUpload() {
+                VueInstance.fileUploadStart();
+            },
+            onTotalProgress: function onTotalProgress(totalUploadedBytes, totalBytes) {
+                $('#uploadFileProgrssbar').progress({
+                    percent: Math.ceil(totalUploadedBytes / totalBytes * 100)
+                });
+            },
+            onAllComplete: function onAllComplete(succeeded, failed) {
+                VueInstance.fileUploadAllComplete(succeeded, failed);
+            }
+        }
+    });
+};
+
+},{}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -253,7 +324,7 @@ exports.default = {
     }
 };
 
-},{"../components/list.vue":3}],7:[function(require,module,exports){
+},{"../components/list.vue":3}],8:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -346,7 +417,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var Vue // late bind
 var map = Object.create(null)
 var shimmed = false
@@ -646,7 +717,7 @@ function format (id) {
   return id.match(/[^\/]+\.vue$/)[0]
 }
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function (process,global){
 /*!
  * Vue.js v1.0.16
@@ -10241,6 +10312,6 @@ if (devtools) {
 
 module.exports = Vue;
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":7}]},{},[1]);
+},{"_process":8}]},{},[1]);
 
 //# sourceMappingURL=app.js.map

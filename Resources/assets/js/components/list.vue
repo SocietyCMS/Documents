@@ -75,15 +75,6 @@
             <td class="right aligned collapsing">{{ object.created_at.diffForHumans }}</td>
         </tr>
         </tbody>
-        <tfoot>
-        <tr>
-            <th><span v-if="folder_meta">{{ folder_meta.objects.folders }}
-                            folders and {{ folder_meta.objects.files }} files</span></th>
-            <th></th>
-            <th class="right aligned collapsing"></th>
-            <th></th>
-        </tr>
-        </tfoot>
     </table>
 
 </template>
