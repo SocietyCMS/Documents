@@ -33,6 +33,6 @@
 
         var jwtoken = '{{$jwtoken}}'
     </script>
-    <script src="{{\Pingpong\Modules\Facades\Module::asset('documents:js/app.js')}}"></script>
+    <script src="{{\Pingpong\Modules\Facades\Module::asset('documents:bundle.js')}}"></script>
 
 @endsection
