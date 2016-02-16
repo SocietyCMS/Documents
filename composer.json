@@ -1,10 +1,14 @@
 {
-  "name": "pingpong-modules/documents",
-  "description": "",
+  "name": "societycms/module-documents",
+  "description": "The SocietyCMS Documents module.",
+  "keywords": ["cms", "societycms"],
+  "license": "AGPL",
+  "version": "0.0.1",
+  "type": "societycms-module",
   "authors": [
     {
-      "name": "Pingpong Labs",
-      "email": "pingpong.labs@gmail.com"
+      "name": "Ralph Huwiler",
+      "email": "ralph@huwiler.rocks"
     }
   ],
   "autoload": {
