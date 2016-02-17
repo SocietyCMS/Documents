@@ -1,6 +1,4 @@
 var BrowserSyncPlugin = require('browser-sync-webpack-plugin');
-var autoprefixer = require('autoprefixer');
-var precss = require('precss');
 var WebpackPublishPlugin = require('../../WebpackPublishPlugin');
 
 
@@ -20,9 +18,7 @@ module.exports = {
             { test: /\.jsx?$/, exclude: /(node_modules|bower_components)/, loader: 'babel', query: { presets: ['react', 'es2015'], plugins: ['transform-runtime']} },
             { test: /\.vue$/, loader: 'vue' },
 
-            {test: /\.scss$/, loader: 'style!css-loader!sass-loader!postcss'},
-            {test: /\.less/, loader: 'style!css-loader!less-loader!postcss'},
-            {test: /\.css$/, loader: "style!css-loader!postcss"},
+            {test: /\.scss$/, loader: "style!css-loader!postcss"},
 
             {test: /\.png$/, loader: 'url', query: { limit: 25000, prefix: 'img/', name: '[name].[ext]?[hash]'}},
             {test: /\.jpg$/, loader: 'url', query: { limit: 25000, prefix: 'img/', name: '[name].[ext]?[hash]'}},
@@ -36,7 +32,11 @@ module.exports = {
         ]
     },
     postcss: function () {
-        return [autoprefixer, precss];
+        return [
+            require('autoprefixer'),
+            require('precss'),
+            require('postcss-less-vars')
+        ];
     },
     plugins: [
         new BrowserSyncPlugin({

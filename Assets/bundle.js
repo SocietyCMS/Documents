@@ -224,7 +224,7 @@
 	  var hotAPI = require("vue-hot-reload-api")
 	  hotAPI.install(require("vue"), true)
 	  if (!hotAPI.compatible) return
-	  var id = "/home/ralph/web/societycms.dev/modules/Documents/Resources/assets/js/components/pooltree.vue"
+	  var id = "/home/ralph/webDev/societycms/modules/Documents/Resources/assets/js/components/pooltree.vue"
 	  if (!module.hot.data) {
 	    hotAPI.createRecord(id, module.exports)
 	  } else {
@@ -271,7 +271,7 @@
 	  var hotAPI = require("vue-hot-reload-api")
 	  hotAPI.install(require("vue"), true)
 	  if (!hotAPI.compatible) return
-	  var id = "/home/ralph/web/societycms.dev/modules/Documents/Resources/assets/js/components/breadcrumb.vue"
+	  var id = "/home/ralph/webDev/societycms/modules/Documents/Resources/assets/js/components/breadcrumb.vue"
 	  if (!module.hot.data) {
 	    hotAPI.createRecord(id, module.exports)
 	  } else {
@@ -380,7 +380,7 @@
 	  var hotAPI = require("vue-hot-reload-api")
 	  hotAPI.install(require("vue"), true)
 	  if (!hotAPI.compatible) return
-	  var id = "/home/ralph/web/societycms.dev/modules/Documents/Resources/assets/js/components/list.vue"
+	  var id = "/home/ralph/webDev/societycms/modules/Documents/Resources/assets/js/components/list.vue"
 	  if (!module.hot.data) {
 	    hotAPI.createRecord(id, module.exports)
 	  } else {
@@ -466,17 +466,17 @@
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"!!./../../../node_modules/css-loader/index.js!./../../../node_modules/less-loader/index.js!./../../../node_modules/postcss-loader/index.js!./Documents.less\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+	var content = __webpack_require__(15);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(16)(content, {});
+	var update = __webpack_require__(17)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
 		// When the styles change, update the <style> tags
 		if(!content.locals) {
-			module.hot.accept("!!./../../../node_modules/css-loader/index.js!./../../../node_modules/less-loader/index.js!./../../../node_modules/postcss-loader/index.js!./Documents.less", function() {
-				var newContent = require("!!./../../../node_modules/css-loader/index.js!./../../../node_modules/less-loader/index.js!./../../../node_modules/postcss-loader/index.js!./Documents.less");
+			module.hot.accept("!!./../../../node_modules/css-loader/index.js!./../../../node_modules/postcss-loader/index.js!./Documents.scss", function() {
+				var newContent = require("!!./../../../node_modules/css-loader/index.js!./../../../node_modules/postcss-loader/index.js!./Documents.scss");
 				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 				update(newContent);
 			});
@@ -486,8 +486,77 @@
 	}
 
 /***/ },
-/* 15 */,
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(16)();
+	// imports
+
+
+	// module
+	exports.push([module.id, "/*-------------------\n      Site Colors\n--------------------*/\n/*---  Colors  ---*/\n/*---  Light Colors  ---*/\n/*---   Neutrals  ---*/\n/*--- Colored Backgrounds ---*/\n/*--- Colored Headers ---*/\n/*--- Colored Text ---*/\n//: #8ABC1E;\n//: #1EBC30;\n//: #10A3A3;\n//: #2185D0;\n/*-------------------\n     Alpha Colors\n--------------------*/\n/*-------------------\n       Accents\n--------------------*/\n/* Differentiating Neutrals */\n/* Differentiating Layers */\n/*******************************\n           Power-User\n*******************************/\n/*-------------------\n    Emotive Colors\n--------------------*/\n/* Positive */\n/* Negative */\n/* Info */\n/* Warning */\n\n.ui.segment.fileBrowser {\n  min-height: 20em;\n  padding: 0;\n\n}\n\n.ui.segment.fileBrowser .treeView {\n  margin: 0;\n  padding: 1em;\n  background-color: #FFFFFF;\n  overflow: hidden;\n  border-right: 1px solid #DCDDDE;\n\n}\n\n.ui.segment.fileBrowser .treeView .list.pool {\n  margin: 0;\n\n}\n\n.ui.segment.fileBrowser .fileView {\n  padding: 0;\n\n}\n\n\n.ui.menu.fileMenu .item>.button {\n  margin: -.5em .25em;\n\n}\n\n\n.ui.menu.fileMenu .ui.breadcrumb.item:before {\n  display: none;\n\n}\n\n#file-list-table {\n  border:none;\n  border-radius:0;\n}\n\n#file-list-table tbody tr td.selectable:hover {\n  background: none!important;\n  color: rgba(0,0,0,.95)!important;\n\n}\n\n#file-list-table .object .ui.text {\n  display: -webkit-inline-box;\n  display: -webkit-inline-flex;\n  display: -ms-inline-flexbox;\n  display: inline-flex;\n\n}\n\n#file-list-table .object .ui.input {\n  min-width: 50%;\n\n}\n", ""]);
+
+	// exports
+
+
+/***/ },
 /* 16 */
+/***/ function(module, exports) {
+
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	// css base code, injected by the css-loader
+	module.exports = function() {
+		var list = [];
+
+		// return the list of modules as css string
+		list.toString = function toString() {
+			var result = [];
+			for(var i = 0; i < this.length; i++) {
+				var item = this[i];
+				if(item[2]) {
+					result.push("@media " + item[2] + "{" + item[1] + "}");
+				} else {
+					result.push(item[1]);
+				}
+			}
+			return result.join("");
+		};
+
+		// import a list of modules into the list
+		list.i = function(modules, mediaQuery) {
+			if(typeof modules === "string")
+				modules = [[null, modules, ""]];
+			var alreadyImportedModules = {};
+			for(var i = 0; i < this.length; i++) {
+				var id = this[i][0];
+				if(typeof id === "number")
+					alreadyImportedModules[id] = true;
+			}
+			for(i = 0; i < modules.length; i++) {
+				var item = modules[i];
+				// skip already imported module
+				// this implementation is not 100% perfect for weird media query combinations
+				//  when a module is imported multiple times with different media queries.
+				//  I hope this will never occur (Hey this way we have smaller bundles)
+				if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+					if(mediaQuery && !item[2]) {
+						item[2] = mediaQuery;
+					} else if(mediaQuery) {
+						item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+					}
+					list.push(item);
+				}
+			}
+		};
+		return list;
+	};
+
+
+/***/ },
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*

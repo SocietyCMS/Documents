@@ -1,3 +1,3 @@
 require('./js/app.js');
 
-require('./less/Documents.less');
+require('./css/Documents.scss');

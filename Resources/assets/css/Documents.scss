@@ -1,4 +1,4 @@
-@import '../../../../../themes/societyadmin/semantic/src/definitions/globals/site.less';
+@import "../../../../../themes/societyadmin/variables.scss";
 
 .ui.segment.fileBrowser {
   min-height: 20em;
@@ -7,9 +7,9 @@
   .treeView {
     margin: 0;
     padding: 1em;
-    background-color: @white;
+    background-color: $white;
     overflow: hidden;
-    border-right: 1px solid @lightGrey;
+    border-right: 1px solid $lightGrey;
 
     .list.pool {
       margin: 0;
