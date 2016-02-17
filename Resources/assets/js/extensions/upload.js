@@ -1,4 +1,4 @@
-export function dragAndDropModule() {
+export function dragAndDropModule(VueInstance) {
 
     return new fineUploader.DragAndDrop({
         dropZoneElements: [document.getElementById('fileView')],
@@ -7,21 +7,22 @@ export function dragAndDropModule() {
         },
         callbacks: {
             processingDroppedFilesComplete: function (files, dropTarget) {
-                fineUploaderBasicInstanceImages().addFiles(files);
+                fineUploaderBasicInstance(VueInstance).addFiles(files);
             }
         }
     })
 
 };
 
-export function fineUploaderBasicInstanceImages() {
+export function fineUploaderBasicInstance(VueInstance) {
+
     return new fineUploader.FineUploaderBasic({
         button: document.getElementById('uploadFileButton'),
         request: {
-            endpoint: '',
+            endpoint: Vue.url(resourceDocumentsFileStore, {pool: VueInstance.$route.params.pool}),
             inputName: 'data-binary',
             customHeaders: {
-                "Authorization": "Bearer {{$jwtoken}}"
+                "Authorization": "Bearer "+jwtoken
             }
         },
         callbacks: {
@@ -35,7 +36,6 @@ export function fineUploaderBasicInstanceImages() {
                     toastr.error(responseJSON.errors[0], responseJSON.message);
                     this.editMode = null;
                     this.editObject = null;
-                    return;
                 }
 
             },

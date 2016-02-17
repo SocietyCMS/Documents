@@ -96,6 +96,8 @@
 
 	router.start(App, '#societyAdmin');
 
+	(0, _upload.dragAndDropModule)(router.app);
+
 /***/ },
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
@@ -200,6 +202,33 @@
 	            }
 
 	            this.requestObjectIndex();
+	        },
+
+
+	        createPool: function createPool() {
+	            event.preventDefault();
+
+	            var resource = this.$resource(resourceDocumentsPoolStore);
+	            resource.save({ title: 'SocietyCMS', quota: 1000000 }, function (data, status, request) {}.bind(this)).error(function (data, status, request) {
+	                toastr.error(data.errors[0], data.message);
+	                this.editMode = null;
+	                this.editObject = null;
+	            }.bind(this));
+	        },
+
+	        fileUploadStart: function fileUploadStart() {
+	            this.editMode = 'uploadFiles';
+	        },
+	        fileUploadComplete: function fileUploadComplete(id, name, responseJSON) {
+	            if (responseJSON.data.uid) {
+	                this.objects.push(responseJSON.data);
+	                this.meta.objects.files++;
+	                this.selectedPool.objects.files++;
+	                this.selectedPool.quotaUsed += responseJSON.data.objectSize;
+	            }
+	        },
+	        fileUploadAllComplete: function fileUploadAllComplete(responseJSON) {
+	            this.editMode = null;
 	        }
 	    }
 	};
@@ -249,7 +278,7 @@
 /* 6 */
 /***/ function(module, exports) {
 
-	module.exports = "\n<div class=\"ui pool list\">\n    <div class=\"item\">\n        <i class=\"home icon\"></i>\n\n           <i class=\"minus square outline icon\" v-if=\"selected == pool\"></i>\n           <i class=\"plus square outline icon\" v-else></i>\n\n       <div class=\"content\">\n\n           <a v-link=\"{ name: 'path', params: { pool: pool.uid, parent_uid: 'null'}}\" class=\"header\">{{pool.title}}</a>\n        </div>\n    </div>\n</div>\n\n";
+	module.exports = "\n<div class=\"ui pool list\">\n    <div class=\"item\">\n        <i class=\"home icon\"></i>\n\n           <i class=\"minus square outline icon\" v-if=\"selected == pool\"></i>\n           <i class=\"plus square outline icon\" v-else></i>\n\n       <div class=\"content\">\n           <a v-link=\"{ name: 'path', params: { pool: pool.uid, parent_uid: 'null'}}\" class=\"header\">{{pool.title}}</a>\n        </div>\n    </div>\n</div>\n\n";
 
 /***/ },
 /* 7 */
@@ -404,8 +433,8 @@
 	    value: true
 	});
 	exports.dragAndDropModule = dragAndDropModule;
-	exports.fineUploaderBasicInstanceImages = fineUploaderBasicInstanceImages;
-	function dragAndDropModule() {
+	exports.fineUploaderBasicInstance = fineUploaderBasicInstance;
+	function dragAndDropModule(VueInstance) {
 
 	    return new fineUploader.DragAndDrop({
 	        dropZoneElements: [document.getElementById('fileView')],
@@ -414,20 +443,21 @@
 	        },
 	        callbacks: {
 	            processingDroppedFilesComplete: function processingDroppedFilesComplete(files, dropTarget) {
-	                fineUploaderBasicInstanceImages().addFiles(files);
+	                fineUploaderBasicInstance(VueInstance).addFiles(files);
 	            }
 	        }
 	    });
 	};
 
-	function fineUploaderBasicInstanceImages() {
+	function fineUploaderBasicInstance(VueInstance) {
+
 	    return new fineUploader.FineUploaderBasic({
 	        button: document.getElementById('uploadFileButton'),
 	        request: {
-	            endpoint: '',
+	            endpoint: Vue.url(resourceDocumentsFileStore, { pool: VueInstance.$route.params.pool }),
 	            inputName: 'data-binary',
 	            customHeaders: {
-	                "Authorization": "Bearer {{$jwtoken}}"
+	                "Authorization": "Bearer " + jwtoken
 	            }
 	        },
 	        callbacks: {
@@ -441,7 +471,6 @@
 	                    toastr.error(responseJSON.errors[0], responseJSON.message);
 	                    this.editMode = null;
 	                    this.editObject = null;
-	                    return;
 	                }
 	            },
 	            onUpload: function onUpload() {

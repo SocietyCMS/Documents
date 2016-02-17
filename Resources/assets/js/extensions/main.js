@@ -84,6 +84,35 @@ export default {
             }
 
             this.requestObjectIndex();
-        }
+        },
+
+
+        createPool: function() {
+            event.preventDefault();
+
+            var resource = this.$resource(resourceDocumentsPoolStore);
+            resource.save({title: 'SocietyCMS', quota: 1000000}, function (data, status, request) {
+            }.bind(this)).error(function (data, status, request) {
+                toastr.error(data.errors[0], data.message);
+                this.editMode = null;
+                this.editObject = null;
+            }.bind(this));
+        },
+
+
+        fileUploadStart: function () {
+            this.editMode = 'uploadFiles';
+        },
+        fileUploadComplete: function (id, name, responseJSON) {
+            if (responseJSON.data.uid) {
+                this.objects.push(responseJSON.data);
+                this.meta.objects.files++;
+                this.selectedPool.objects.files++;
+                this.selectedPool.quotaUsed += responseJSON.data.objectSize;
+            }
+        },
+        fileUploadAllComplete: function (responseJSON) {
+            this.editMode = null;
+        },
     }
 };

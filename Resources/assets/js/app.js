@@ -1,8 +1,7 @@
 import main from './extensions/main.js';
 import view from './extensions/view.js';
 
-import { dragAndDropModule, fineUploaderBasicInstanceImages } from './extensions/upload.js';
-
+import { dragAndDropModule, fineUploaderBasicInstance } from './extensions/upload.js';
 
 Vue.filter('advancedSort', function (arr, sortKey, reverse) {
     var orderBy = Vue.filter('orderBy');
@@ -25,3 +24,5 @@ router.map({
 });
 
 router.start(App, '#societyAdmin');
+
+dragAndDropModule(router.app);

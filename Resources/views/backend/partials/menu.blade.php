@@ -7,7 +7,7 @@
             <span class="text">New</span>
 
             <div class="menu">
-                <div class="item">Document</div>
+                <div class="item" v-on:click="createPool">Pool</div>
                 <div class="item">Image</div>
             </div>
         </div>

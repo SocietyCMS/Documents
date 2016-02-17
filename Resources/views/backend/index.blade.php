@@ -28,10 +28,14 @@
 
         var resourceDocumentsPoolIndex = '{{apiRoute('v1', 'api.documents.pool.index')}}';
         var resourceDocumentsPoolShow = '{{apiRoute('v1', 'api.documents.pool.show', ['pool' => ':uid'])}}';
+        var resourceDocumentsPoolStore = '{{apiRoute('v1', 'api.documents.pool.store')}}';
+
+
+        var resourceDocumentsFileStore = '{{apiRoute('v1', 'api.documents.file.store', ['pool' => ':pool'])}}';
 
         var resourceDocumentsPoolListFolder = '{{apiRoute('v1', 'api.documents.list_folder', ['pool' => ':uid'])}}';
 
-        var jwtoken = '{{$jwtoken}}'
+        var jwtoken = '{{$jwtoken}}';
     </script>
     <script src="{{\Pingpong\Modules\Facades\Module::asset('documents:bundle.js')}}"></script>
 
