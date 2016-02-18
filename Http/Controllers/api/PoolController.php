@@ -49,14 +49,14 @@ class PoolController extends ApiBaseController
         foreach ($this->repository->all() as $item) {
             $permissionManager = new \Modules\Core\Permissions\PermissionManager();
             $permissionManager->registerPermission(
-                "documents::pool-{$item->uid}-read",
+                "documents:unmanaged::pool-{$item->uid}-read",
                 $item->title,
                 $item->description,
                 "documents"
             );
 
             $permissionManager->registerPermission(
-                "documents::pool-{$item->uid}-write",
+                "documents:unmanaged::pool-{$item->uid}-write",
                 $item->title,
                 $item->description,
                 "documents"

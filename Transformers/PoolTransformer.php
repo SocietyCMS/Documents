@@ -20,8 +20,8 @@ class PoolTransformer extends Fractal\TransformerAbstract
                 'folders' => $pool->objects->where('tag', 'folder')->count(),
             ],
             'userPermission' => [
-                'read'  => $this->user()->can("documents::pool-{$pool->uid}-read"),
-                'write' => $this->user()->can("documents::pool-{$pool->uid}-write"),
+                'read'  => $this->user()->can("documents:unmanaged::pool-{$pool->uid}-read"),
+                'write' => $this->user()->can("documents:unmanaged::pool-{$pool->uid}-write"),
             ],
             'deleted'        => (bool)$pool->trashed(),
             'created_at'     => $pool->created_at->toRfc3339String(),
