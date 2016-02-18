@@ -3,8 +3,8 @@
     <div class="content">
         <form class="ui form">
             <div class="ui field">
-                <label>Name</label>
-                <input type="text" placeholder="Pool Name..." v-model="newPool.name">
+                <label>Title</label>
+                <input type="text" placeholder="Pool Title..." v-model="newPool.title">
             </div>
             <div class="ui three wide field">
                 <label>Description</label>
@@ -24,7 +24,7 @@
 
             @include('user::backend.fields.roles',['label' => 'These Roles can upload and edit files:','v_model'=> 'newPool.writeRoles'])
 
-            <button class="ui green inverted fluid button" v-on:click="createPool" v-bind:class="{'disabled':!newPool.name}">
+            <button class="ui green inverted fluid button" v-on:click="createPool" v-bind:class="{'disabled':!newPool.title}">
                 <i class="checkmark icon"></i>
                 Create
             </button>

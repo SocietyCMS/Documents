@@ -46,23 +46,6 @@ class PoolController extends ApiBaseController
      */
     public function index(Request $request)
     {
-        foreach ($this->repository->all() as $item) {
-            $permissionManager = new \Modules\Core\Permissions\PermissionManager();
-            $permissionManager->registerPermission(
-                "documents:unmanaged::pool-{$item->uid}-read",
-                $item->title,
-                $item->description,
-                "documents"
-            );
-
-            $permissionManager->registerPermission(
-                "documents:unmanaged::pool-{$item->uid}-write",
-                $item->title,
-                $item->description,
-                "documents"
-            );
-        }
-
         $this->repository->pushCriteria(new PoolPermissionCriteria($this->auth->user()));
         $this->repository->skipCache(true);
         $pools = $this->repository->paginate();
@@ -82,10 +65,12 @@ class PoolController extends ApiBaseController
         }
 
         $pool = $this->repository->create([
-            'title'       => $request->title,
+            'title' => $request->title,
             'description' => $request->description,
-            'quota'       => $request->quota,
+            'quota' => $request->quota,
         ]);
+
+        $this->registerPoolPermissins($request, $pool);
 
         return $this->response->item($pool, new PoolTransformer());
     }
@@ -114,9 +99,9 @@ class PoolController extends ApiBaseController
 
         $pool_id = $this->repository->findByUid($request->pool)->id;
         $item = $this->repository->update([
-            'title'       => $request->title,
+            'title' => $request->title,
             'description' => $request->description,
-            'quota'       => $request->quota,
+            'quota' => $request->quota,
         ], $pool_id);
 
         return $this->response->item($item, new PoolTransformer());
@@ -134,5 +119,32 @@ class PoolController extends ApiBaseController
         $pool->delete();
 
         return $this->successDeleted();
+    }
+
+
+    /**
+     * Register Permission for a pool
+     *
+     * @param $pool
+     */
+    protected function registerPoolPermissins(Request $request, $pool)
+    {
+        $permissionManager = new \Modules\Core\Permissions\PermissionManager();
+
+        $readRole = $permissionManager->registerPermission(
+            "documents:unmanaged::pool-{$pool->uid}-read",
+            $pool->title,
+            $pool->description,
+            "documents"
+        );
+        $readRole->roles()->sync($request->readRoles);
+
+        $writeRole = $permissionManager->registerPermission(
+            "documents:unmanaged::pool-{$pool->uid}-write",
+            $pool->title,
+            $pool->description,
+            "documents"
+        );
+        $writeRole->roles()->sync($request->writeRoles);
     }
 }

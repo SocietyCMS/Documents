@@ -12,7 +12,7 @@ export default {
             selectedParent: null,
 
             newPool: {
-                name: null,
+                title: null,
                 quota: 200,
                 readRoles: [],
                 writeRoles: []
@@ -107,7 +107,16 @@ export default {
             event.preventDefault();
 
             var resource = this.$resource(resourceDocumentsPoolStore);
-            resource.save({title: 'SocietyCMS', quota: 1000000}, function (data, status, request) {
+            resource.save(this.newPool, function (data, status, request) {
+                var response = data.data;
+                this.pools.push(response);
+
+                $('#newPool').modal('hide');
+
+                return this.$route.router.go({
+                    name: 'path',
+                    params: { pool: response.uid, parent_uid: 'null' }
+                });
             }.bind(this)).error(function (data, status, request) {
                 toastr.error(data.errors[0], data.message);
                 this.editMode = null;
