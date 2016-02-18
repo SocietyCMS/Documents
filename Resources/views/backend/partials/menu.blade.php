@@ -7,7 +7,6 @@
             <span class="text">New</span>
 
             <div class="menu">
-                <div class="item" v-on:click="createPool">Pool</div>
                 <div class="item">Image</div>
             </div>
         </div>
@@ -17,14 +16,13 @@
         <div class="item">
             Save...
         </div>
-        <div class="item">Edit Permissions</div>
+
         <div class="divider"></div>
         <div class="header">
-            Export
+            Pools
         </div>
-        <div class="item">
-            Share...
-        </div>
+        <div class="item" v-on:click="createPoolModal">New Pool</div>
+        <div class="item">Edit Permissions</div>
     </div>
 </div>
 

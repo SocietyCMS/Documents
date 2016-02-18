@@ -20,6 +20,7 @@
             <div class="fourteen wide column fileView" id="fileView">@include('documents::backend.partials.multiview')</div>
     </div>
 
+    @include('documents::backend.partials.createPoolModal')
 
 @endsection
 

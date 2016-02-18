@@ -125,7 +125,14 @@
 	            objects: [],
 	            meta: null,
 	            selectedPool: null,
-	            selectedParent: null
+	            selectedParent: null,
+
+	            newPool: {
+	                name: null,
+	                quota: 200,
+	                readRoles: [],
+	                writeRoles: []
+	            }
 	        };
 	    },
 
@@ -146,7 +153,6 @@
 	            resource.get({}).then(function (response) {
 	                this.pools = response.data.data;
 	                this.selectPool();
-	                this.selectParent();
 	            }.bind(this), function (response) {
 	                toastr.error(response.data.message, 'Error: ' + response.data.status_code);
 	            }.bind(this));
@@ -179,22 +185,27 @@
 
 	        selectPool: function selectPool() {
 
-	            if (this.$route.params && this.$route.params.pool) {
-
-	                var uid = this.$route.params.pool;
-	                var result = $.grep(this.pools, function (e) {
-	                    return e.uid == uid;
+	            if (!this.$route.params || !this.$route.params.pool) {
+	                return this.$route.router.go({
+	                    name: 'path',
+	                    params: { pool: this.pools[0].uid, parent_uid: 'null' }
 	                });
-	                if (result.length == 0) {
-	                    this.selectedPool = null;
-	                } else if (result.length == 1) {
-	                    this.selectedPool = result[0];
-	                } else {
-	                    this.selectedPool = result[0];
-	                }
-	            } else {
-	                this.selectedPool = this.pools[0];
 	            }
+
+	            var uid = this.$route.params.pool;
+	            var result = $.grep(this.pools, function (e) {
+	                return e.uid == uid;
+	            });
+
+	            if (result.length == 0) {
+	                this.selectedPool = null;
+	            } else if (result.length == 1) {
+	                this.selectedPool = result[0];
+	            } else {
+	                this.selectedPool = result[0];
+	            }
+
+	            this.selectParent();
 	        },
 	        selectParent: function selectParent() {
 	            if (this.$route.params && this.$route.params.parent_uid) {
@@ -202,6 +213,9 @@
 	            }
 
 	            this.requestObjectIndex();
+	        },
+	        createPoolModal: function createPoolModal() {
+	            $('#newPool').modal('setting', 'transition', 'fade up').modal('show');
 	        },
 
 
