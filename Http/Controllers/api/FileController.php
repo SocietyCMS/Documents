@@ -81,10 +81,10 @@ class FileController extends ApiBaseController
     public function store(Request $request)
     {
         if ($this->validator->with($request->input())->fails(ValidatorInterface::RULE_CREATE)) {
-            throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not create new file.', $this->validator->errors());
+            throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not upload new file.', $this->validator->errors());
         }
         if (is_null($request->file('data-binary'))) {
-            throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not create new file.', ['data-binary is not a file']);
+            throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not upload new file.', ['data-binary is not a file']);
         }
 
         $this->validatePoolQuota($request);

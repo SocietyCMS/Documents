@@ -1,7 +1,6 @@
 @import "../../../../../themes/societyadmin/variables.scss";
 
 .ui.segment.fileBrowser {
-  min-height: 20em;
   padding: 0;
 
   .treeView {
@@ -18,6 +17,7 @@
 
   .fileView {
     padding: 0;
+    min-height: 20em;
   }
 
 }

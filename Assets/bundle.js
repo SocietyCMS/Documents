@@ -81,6 +81,19 @@
 	    return orderBy(orderdArrayKey, 'tag', -1);
 	});
 
+	Vue.filter('quotaToMB', function (value) {
+	    return value / 1024 / 1024;
+	});
+
+	Vue.filter('quotaToMB', {
+	    read: function read(val) {
+	        return val / 1024 / 1024;
+	    },
+	    write: function write(val, oldVal) {
+	        return val * 1024 * 1024;
+	    }
+	});
+
 	var App = Vue.extend(_main2.default);
 
 	var View = Vue.extend(_view2.default);
@@ -129,7 +142,7 @@
 
 	            newPool: {
 	                title: null,
-	                quota: 200,
+	                quota: 209715200,
 	                readRoles: [],
 	                writeRoles: []
 	            }
@@ -158,6 +171,10 @@
 	            }.bind(this));
 	        },
 	        requestObjectIndex: function requestObjectIndex() {
+	            if (this.selectedPool == null) {
+	                return;
+	            }
+
 	            var resource = this.$resource(resourceDocumentsPoolListFolder);
 	            resource.get({ uid: this.selectedPool.uid }, { parent_uid: this.selectedParent }).then(function (response) {
 	                this.objects = response.data.data;
@@ -217,6 +234,9 @@
 	        createPoolModal: function createPoolModal() {
 	            $('#newPool').modal('setting', 'transition', 'fade up').modal('show');
 	        },
+	        permissionPoolModal: function permissionPoolModal() {
+	            $('#permissionPool').modal('setting', 'transition', 'fade up').modal('show');
+	        },
 
 
 	        createPool: function createPool() {
@@ -229,6 +249,13 @@
 
 	                $('#newPool').modal('hide');
 
+	                this.newPool = {
+	                    title: null,
+	                    quota: 209715200,
+	                    readRoles: [],
+	                    writeRoles: []
+	                };
+
 	                return this.$route.router.go({
 	                    name: 'path',
 	                    params: { pool: response.uid, parent_uid: 'null' }
@@ -240,9 +267,20 @@
 	            }.bind(this));
 	        },
 
-	        fileUploadStart: function fileUploadStart() {
-	            this.editMode = 'uploadFiles';
+	        updatePool: function updatePool(pool) {
+	            event.preventDefault();
+
+	            var resource = this.$resource(resourceDocumentsPoolUpdate);
+	            resource.update(pool, { uid: pool.uid }, function (data, status, request) {
+	                var response = data.data;
+	            }.bind(this)).error(function (data, status, request) {
+	                toastr.error(data.errors[0], data.message);
+	                this.editMode = null;
+	                this.editObject = null;
+	            }.bind(this));
 	        },
+
+	        fileUploadStart: function fileUploadStart() {},
 	        fileUploadComplete: function fileUploadComplete(id, name, responseJSON) {
 	            if (responseJSON.data.uid) {
 	                this.objects.push(responseJSON.data);
@@ -251,9 +289,7 @@
 	                this.selectedPool.quotaUsed += responseJSON.data.objectSize;
 	            }
 	        },
-	        fileUploadAllComplete: function fileUploadAllComplete(responseJSON) {
-	            this.editMode = null;
-	        }
+	        fileUploadAllComplete: function fileUploadAllComplete(responseJSON) {}
 	    }
 	};
 
@@ -489,7 +525,7 @@
 	                VueInstance.fileUploadComplete(id, name, responseJSON);
 	            },
 	            onError: function onError(id, name, errorReason, XMLHttpRequest) {
-	                responseJSON = JSON.parse(XMLHttpRequest.response);
+	                var responseJSON = JSON.parse(XMLHttpRequest.response);
 
 	                if (responseJSON.errors) {
 	                    toastr.error(responseJSON.errors[0], responseJSON.message);
@@ -547,7 +583,7 @@
 
 
 	// module
-	exports.push([module.id, "/*-------------------\n      Site Colors\n--------------------*/\n/*---  Colors  ---*/\n/*---  Light Colors  ---*/\n/*---   Neutrals  ---*/\n/*--- Colored Backgrounds ---*/\n/*--- Colored Headers ---*/\n/*--- Colored Text ---*/\n//: #8ABC1E;\n//: #1EBC30;\n//: #10A3A3;\n//: #2185D0;\n/*-------------------\n     Alpha Colors\n--------------------*/\n/*-------------------\n       Accents\n--------------------*/\n/* Differentiating Neutrals */\n/* Differentiating Layers */\n/*******************************\n           Power-User\n*******************************/\n/*-------------------\n    Emotive Colors\n--------------------*/\n/* Positive */\n/* Negative */\n/* Info */\n/* Warning */\n\n.ui.segment.fileBrowser {\n  min-height: 20em;\n  padding: 0;\n\n}\n\n.ui.segment.fileBrowser .treeView {\n  margin: 0;\n  padding: 1em;\n  background-color: #FFFFFF;\n  overflow: hidden;\n  border-right: 1px solid #DCDDDE;\n\n}\n\n.ui.segment.fileBrowser .treeView .list.pool {\n  margin: 0;\n\n}\n\n.ui.segment.fileBrowser .fileView {\n  padding: 0;\n\n}\n\n\n.ui.menu.fileMenu .item>.button {\n  margin: -.5em .25em;\n\n}\n\n\n.ui.menu.fileMenu .ui.breadcrumb.item:before {\n  display: none;\n\n}\n\n#file-list-table {\n  border:none;\n  border-radius:0;\n}\n\n#file-list-table tbody tr td.selectable:hover {\n  background: none!important;\n  color: rgba(0,0,0,.95)!important;\n\n}\n\n#file-list-table .object .ui.text {\n  display: -webkit-inline-box;\n  display: -webkit-inline-flex;\n  display: -ms-inline-flexbox;\n  display: inline-flex;\n\n}\n\n#file-list-table .object .ui.input {\n  min-width: 50%;\n\n}\n", ""]);
+	exports.push([module.id, "/*-------------------\n      Site Colors\n--------------------*/\n/*---  Colors  ---*/\n/*---  Light Colors  ---*/\n/*---   Neutrals  ---*/\n/*--- Colored Backgrounds ---*/\n/*--- Colored Headers ---*/\n/*--- Colored Text ---*/\n//: #8ABC1E;\n//: #1EBC30;\n//: #10A3A3;\n//: #2185D0;\n/*-------------------\n     Alpha Colors\n--------------------*/\n/*-------------------\n       Accents\n--------------------*/\n/* Differentiating Neutrals */\n/* Differentiating Layers */\n/*******************************\n           Power-User\n*******************************/\n/*-------------------\n    Emotive Colors\n--------------------*/\n/* Positive */\n/* Negative */\n/* Info */\n/* Warning */\n\n.ui.segment.fileBrowser {\n  padding: 0;\n\n}\n\n.ui.segment.fileBrowser .treeView {\n  margin: 0;\n  padding: 1em;\n  background-color: #FFFFFF;\n  overflow: hidden;\n  border-right: 1px solid #DCDDDE;\n\n}\n\n.ui.segment.fileBrowser .treeView .list.pool {\n  margin: 0;\n\n}\n\n.ui.segment.fileBrowser .fileView {\n  padding: 0;\n  min-height: 20em;\n\n}\n\n\n.ui.menu.fileMenu .item>.button {\n  margin: -.5em .25em;\n\n}\n\n\n.ui.menu.fileMenu .ui.breadcrumb.item:before {\n  display: none;\n\n}\n\n#file-list-table {\n  border:none;\n  border-radius:0;\n}\n\n#file-list-table tbody tr td.selectable:hover {\n  background: none!important;\n  color: rgba(0,0,0,.95)!important;\n\n}\n\n#file-list-table .object .ui.text {\n  display: -webkit-inline-box;\n  display: -webkit-inline-flex;\n  display: -ms-inline-flexbox;\n  display: inline-flex;\n\n}\n\n#file-list-table .object .ui.input {\n  min-width: 50%;\n\n}\n", ""]);
 
 	// exports
 

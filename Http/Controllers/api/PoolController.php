@@ -106,6 +106,8 @@ class PoolController extends ApiBaseController
             'quota' => $request->quota,
         ], $pool_id);
 
+        $this->syncPoolPermissins($request, $item);
+
         return $this->response->item($item, new PoolTransformer());
     }
 
@@ -148,5 +150,29 @@ class PoolController extends ApiBaseController
             "documents"
         );
         $writeRole->roles()->sync($request->writeRoles);
+    }
+
+    /**
+     * Sync Permission for a pool
+     *
+     * @param $pool
+     */
+    protected function syncPoolPermissins(Request $request, $pool)
+    {
+        $permissionManager = new \Modules\Core\Permissions\PermissionManager();
+
+        $readRole = $permissionManager->getPermission("documents:unmanaged::pool-{$pool->uid}-read");
+        if (isset($request->permissions['read'])) {
+            $readRole->roles()->sync($request->permissions['read']);
+        } else {
+            $readRole->roles()->detach();
+        }
+
+        $writeRole = $permissionManager->getPermission("documents:unmanaged::pool-{$pool->uid}-write");
+        if (isset($request->permissions['write'])) {
+            $writeRole->roles()->sync($request->permissions['write']);
+        } else {
+            $writeRole->roles()->detach();
+        }
     }
 }

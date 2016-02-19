@@ -9,6 +9,20 @@ Vue.filter('advancedSort', function (arr, sortKey, reverse) {
     return orderBy(orderdArrayKey, 'tag', -1);
 });
 
+Vue.filter('quotaToMB', function (value) {
+    return value / 1024 / 1024;
+});
+
+Vue.filter('quotaToMB', {
+    read: function(val) {
+        return val / 1024 / 1024;
+    },
+    write: function(val, oldVal) {
+        return val * 1024 * 1024;
+    }
+})
+
+
 
 var App = Vue.extend(main);
 

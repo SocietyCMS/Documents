@@ -2,11 +2,8 @@
     <i class="wrench icon"></i>
 
     <div class="menu">
-        <div class="item">
-            New
-        </div>
-        <div class="item">
-            Open...
+        <div class="item" id="uploadFileButton">
+            Upload
         </div>
         <div class="item">
             Save...
@@ -17,8 +14,8 @@
             <div class="header">
                 Pools
             </div>
-            <div class="item" v-on:click="createPoolModal">New Pool</div>
-            <div class="item">Edit Permissions</div>
+            <div class="item" v-on:click="createPoolModal">New...</div>
+            <div class="item" v-on:click="permissionPoolModal">Edit...</div>
         @endpermission
     </div>
 </div>

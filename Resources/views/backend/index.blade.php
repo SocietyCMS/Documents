@@ -22,6 +22,7 @@
 
     @permission('documents::manage-pools')
         @include('documents::backend.partials.createPoolModal')
+        @include('documents::backend.partials.updatePoolModal')
     @endpermission
 
 @endsection
@@ -32,6 +33,7 @@
         var resourceDocumentsPoolIndex = '{{apiRoute('v1', 'api.documents.pool.index')}}';
         var resourceDocumentsPoolShow = '{{apiRoute('v1', 'api.documents.pool.show', ['pool' => ':uid'])}}';
         var resourceDocumentsPoolStore = '{{apiRoute('v1', 'api.documents.pool.store')}}';
+        var resourceDocumentsPoolUpdate = '{{apiRoute('v1', 'api.documents.pool.update',['pool' => ':uid'])}}';
 
 
         var resourceDocumentsFileStore = '{{apiRoute('v1', 'api.documents.file.store', ['pool' => ':pool'])}}';

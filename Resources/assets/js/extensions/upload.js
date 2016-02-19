@@ -30,7 +30,7 @@ export function fineUploaderBasicInstance(VueInstance) {
                 VueInstance.fileUploadComplete(id, name, responseJSON)
             },
             onError: function (id, name, errorReason, XMLHttpRequest) {
-                responseJSON = JSON.parse(XMLHttpRequest.response);
+                var responseJSON = JSON.parse(XMLHttpRequest.response);
 
                 if(responseJSON.errors) {
                     toastr.error(responseJSON.errors[0], responseJSON.message);

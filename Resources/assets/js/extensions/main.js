@@ -13,7 +13,7 @@ export default {
 
             newPool: {
                 title: null,
-                quota: 200,
+                quota: 209715200,
                 readRoles: [],
                 writeRoles: []
             }
@@ -41,6 +41,10 @@ export default {
         },
 
         requestObjectIndex() {
+            if(this.selectedPool == null) {
+                return;
+            }
+
             var resource = this.$resource(resourceDocumentsPoolListFolder);
             resource.get({uid: this.selectedPool.uid}, {parent_uid: this.selectedParent}).then(function (response) {
                 this.objects = response.data.data;
@@ -103,6 +107,12 @@ export default {
                 .modal('show');
         },
 
+        permissionPoolModal() {
+            $('#permissionPool')
+                .modal('setting', 'transition', 'fade up')
+                .modal('show');
+        },
+
         createPool: function() {
             event.preventDefault();
 
@@ -112,6 +122,13 @@ export default {
                 this.pools.push(response);
 
                 $('#newPool').modal('hide');
+
+                this.newPool = {
+                    title: null,
+                        quota: 209715200,
+                        readRoles: [],
+                        writeRoles: []
+                };
 
                 return this.$route.router.go({
                     name: 'path',
@@ -124,9 +141,22 @@ export default {
             }.bind(this));
         },
 
+        updatePool: function(pool) {
+            event.preventDefault();
+
+            var resource = this.$resource(resourceDocumentsPoolUpdate);
+            resource.update(pool,{uid:pool.uid}, function (data, status, request) {
+                var response = data.data;
+
+            }.bind(this)).error(function (data, status, request) {
+                toastr.error(data.errors[0], data.message);
+                this.editMode = null;
+                this.editObject = null;
+            }.bind(this));
+        },
+
 
         fileUploadStart: function () {
-            this.editMode = 'uploadFiles';
         },
         fileUploadComplete: function (id, name, responseJSON) {
             if (responseJSON.data.uid) {
@@ -137,7 +167,6 @@ export default {
             }
         },
         fileUploadAllComplete: function (responseJSON) {
-            this.editMode = null;
         },
     }
 };
