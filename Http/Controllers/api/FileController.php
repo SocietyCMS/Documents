@@ -53,8 +53,8 @@ class FileController extends ApiBaseController
         $this->validator = $this->repository->makeValidator(FileValidator::class);
         $this->repository->pushCriteria(new PoolCriteria($request->pool));
 
-        $this->middleware("permission:documents::pool-{$request->pool}-read", ['only' => ['index', 'get']]);
-        $this->middleware("permission:documents::pool-{$request->pool}-write", ['only' => ['store', 'update', 'destroy', 'forceDestroy', 'restore']]);
+        $this->middleware("permission:documents:unmanaged::pool-{$request->pool}-read", ['only' => ['index', 'get']]);
+        $this->middleware("permission:documents:unmanaged::pool-{$request->pool}-write", ['only' => ['store', 'update', 'destroy', 'forceDestroy', 'restore']]);
 
     }
 

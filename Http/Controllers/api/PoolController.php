@@ -37,6 +37,8 @@ class PoolController extends ApiBaseController
         parent::__construct();
         $this->repository = $repository;
         $this->validator = $this->repository->makeValidator();
+
+        $this->middleware("permission:documents::manage-pools", ['only' => ['store', 'update', 'destroy']]);
     }
 
 

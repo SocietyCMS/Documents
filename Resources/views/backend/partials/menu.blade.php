@@ -3,12 +3,7 @@
 
     <div class="menu">
         <div class="item">
-            <i class="dropdown icon"></i>
-            <span class="text">New</span>
-
-            <div class="menu">
-                <div class="item">Image</div>
-            </div>
+            New
         </div>
         <div class="item">
             Open...
@@ -17,12 +12,14 @@
             Save...
         </div>
 
-        <div class="divider"></div>
-        <div class="header">
-            Pools
-        </div>
-        <div class="item" v-on:click="createPoolModal">New Pool</div>
-        <div class="item">Edit Permissions</div>
+        @permission('documents::manage-pools')
+            <div class="divider"></div>
+            <div class="header">
+                Pools
+            </div>
+            <div class="item" v-on:click="createPoolModal">New Pool</div>
+            <div class="item">Edit Permissions</div>
+        @endpermission
     </div>
 </div>
 
