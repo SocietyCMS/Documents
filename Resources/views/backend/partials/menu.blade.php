@@ -5,8 +5,8 @@
         <div class="item" id="uploadFileButton">
             Upload
         </div>
-        <div class="item">
-            Save...
+        <div class="item" v-on:click="createFolder(object, $event)">
+            New Folder
         </div>
 
         @permission('documents::manage-pools')

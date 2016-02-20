@@ -168,5 +168,31 @@ export default {
         },
         fileUploadAllComplete: function (responseJSON) {
         },
+
+
+        createFolder: function (object, event) {
+            event.preventDefault();
+            var newFolder = {
+                mimeType: "application/x-directory",
+                parent_uid: this.selectedParent,
+                pool_uid: this.selectedPool.uid,
+                title: "New Folder"
+            };
+
+            var resource = this.$resource(resourceDocumentsFolderStore);
+            resource.save({pool: this.selectedPool.uid}, newFolder, function (data, status, request) {
+
+                this.objects.push(data.data);
+                this.meta.objects.folder++;
+                this.selectedPool.objects.folder++;
+
+            }.bind(this)).error(function (data, status, request) {
+                console.log(data, status, request);
+                toastr.error(data.errors[0], data.message);
+                this.editMode = null;
+                this.editObject = null;
+            }.bind(this));
+        }
+
     }
 };

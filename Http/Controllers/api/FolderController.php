@@ -88,7 +88,7 @@ class FolderController extends ApiBaseController
         $folder = $this->repository->create([
             'title'       => $request->title,
             'description' => $request->description,
-            'parent_uid'  => $this->cleanParameters($request->parent_uid),
+            'parent_uid'  => $request->parent_uid,
             'shared'      => $request->shared,
             'user_id'     => $this->user()->id,
             'pool_uid'    => $request->pool,

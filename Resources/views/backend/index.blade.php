@@ -38,7 +38,10 @@
 
         var resourceDocumentsFileStore = '{{apiRoute('v1', 'api.documents.file.store', ['pool' => ':pool'])}}';
 
+        var resourceDocumentsFolderStore = '{{apiRoute('v1', 'api.documents.create_folder', ['pool' => ':pool'])}}';
+
         var resourceDocumentsPoolListFolder = '{{apiRoute('v1', 'api.documents.list_folder', ['pool' => ':uid'])}}';
+
 
         var jwtoken = '{{$jwtoken}}';
     </script>
