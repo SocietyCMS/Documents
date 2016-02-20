@@ -542,9 +542,13 @@
 	            inputName: 'data-binary',
 	            customHeaders: {
 	                "Authorization": "Bearer " + jwtoken
+	            },
+	            params: {
+	                parent_uid: VueInstance.selectedParent
 	            }
 	        },
 	        callbacks: {
+
 	            onComplete: function onComplete(id, name, responseJSON) {
 	                VueInstance.fileUploadComplete(id, name, responseJSON);
 	            },
