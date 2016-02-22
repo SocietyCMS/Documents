@@ -2,10 +2,10 @@
     <i class="wrench icon"></i>
 
     <div class="menu">
-        <div class="item" id="uploadFileButton">
+        <div class="item" id="uploadFileButton" v-if="selectedPool && selectedPool.userPermissions.write">
             Upload
         </div>
-        <div class="item" v-on:click="createFolder(object, $event)">
+        <div class="item" v-on:click="createFolder(object, $event)" v-if="selectedPool && selectedPool.userPermissions.write">
             New Folder
         </div>
 
