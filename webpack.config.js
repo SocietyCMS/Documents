@@ -1,5 +1,6 @@
 var BrowserSyncPlugin = require('browser-sync-webpack-plugin');
 var WebpackPublishPlugin = require('../../WebpackPublishPlugin');
+var WebpackNotifierPlugin = require('webpack-notifier');
 
 
 module.exports = {
@@ -44,6 +45,10 @@ module.exports = {
         }),
         new WebpackPublishPlugin({
             module: 'Documents'
+        }),
+        new WebpackNotifierPlugin({
+            title: 'SodietyCMS: Documents',
+            alwaysNotify: true
         })
     ]
 };
