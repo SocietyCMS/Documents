@@ -41,9 +41,6 @@ class FolderController extends ApiBaseController
         $this->repository = $repository;
         $this->validator = $this->repository->makeValidator(FolderValidator::class);
         $this->repository->pushCriteria(new PoolCriteria($request->pool));
-
-        $this->middleware("permission:documents:unmanaged::pool-{$request->pool}-read", ['only' => ['list_folder']]);
-        $this->middleware("permission:documents:unmanaged::pool-{$request->pool}-write", ['only' => ['create_folder']]);
     }
 
     /**
@@ -52,6 +49,10 @@ class FolderController extends ApiBaseController
      */
     public function list_folder(ApiRequest $request)
     {
+        if (! $this->user->can(["documents:unmanaged::pool-{$request->pool}-read", "documents:unmanaged::pool-{$request->pool}-write"])) {
+            throw new \Dingo\Api\Exception\ResourceException('Permission denied.');
+        }
+
         $parent = $this->getParent($request);
 
         $this->repository->pushCriteria(new ParentCriteria($request->input('parent_uid', null)));
@@ -82,6 +83,10 @@ class FolderController extends ApiBaseController
      */
     public function create_folder(ApiRequest $request)
     {
+        if (! $this->user->can(["documents:unmanaged::pool-{$request->pool}-write"])) {
+            throw new \Dingo\Api\Exception\ResourceException('Permission denied.');
+        }
+
         if ($this->validator->with($request->input())->fails(ValidatorInterface::RULE_CREATE)) {
             throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not create new folder.', $this->validator->errors());
         }
