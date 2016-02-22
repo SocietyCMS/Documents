@@ -4,6 +4,7 @@ namespace Modules\Documents\Http\Controllers\api;
 
 use Illuminate\Http\Request;
 use Modules\Core\Http\Controllers\ApiBaseController;
+use Modules\Documents\Http\Requests\ApiRequest;
 use Modules\Documents\Repositories\Criterias\PoolPermissionCriteria;
 use Modules\Documents\Repositories\PoolRepository;
 use Modules\Documents\Transformers\PoolTransformer;
@@ -38,7 +39,7 @@ class PoolController extends ApiBaseController
         $this->repository = $repository;
         $this->validator = $this->repository->makeValidator();
 
-        $this->middleware("permission:documents::manage-pools", ['only' => ['store', 'update', 'destroy']]);
+        $this->middleware("permission:documents::manage-pools", ['except' => ['index']]);
     }
 
 
@@ -46,7 +47,7 @@ class PoolController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function index(Request $request)
+    public function index(ApiRequest $request)
     {
         $this->repository->pushCriteria(new PoolPermissionCriteria($this->auth->user()));
         $this->repository->skipCache(true);
@@ -60,7 +61,7 @@ class PoolController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function store(Request $request)
+    public function store(ApiRequest $request)
     {
         if ($this->validator->with($request->input())->fails(ValidatorInterface::RULE_CREATE)) {
             throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not create new pool.', $this->validator->errors());
@@ -82,7 +83,7 @@ class PoolController extends ApiBaseController
      * @param         $pool
      * @return mixed
      */
-    public function get(Request $request)
+    public function get(ApiRequest $request)
     {
         $pool = $this->repository->findByUid($request->pool);
 
@@ -93,7 +94,7 @@ class PoolController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function update(Request $request)
+    public function update(ApiRequest $request)
     {
         if ($this->validator->with(array_merge($request->input(), ['uid' => $request->pool]))->fails(ValidatorInterface::RULE_UPDATE)) {
             throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not create new pool.', $this->validator->errors());
@@ -116,7 +117,7 @@ class PoolController extends ApiBaseController
      * @param         $pool
      * @return mixed
      */
-    public function destroy(Request $request)
+    public function destroy(ApiRequest $request)
     {
         $pool = $this->repository->findByUid($request->pool);
 

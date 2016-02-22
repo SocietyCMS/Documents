@@ -11,23 +11,6 @@ use Prettus\Validator\Contracts\ValidatorInterface;
  */
 class FolderValidator extends BaseValidator
 {
-
-
-    /**
-     * Sanitize input with special rules
-     *
-     * @param $request
-     * @return mixed
-     */
-    public function sanitize($request)
-    {
-        if(empty($request['parent_uid']) || $request['parent_uid'] == 'null'){
-            $request['parent_uid'] = null;
-        }
-
-        return $request;
-    }
-
     /**
      * Specify validation rules
      * @var array
@@ -46,6 +29,5 @@ class FolderValidator extends BaseValidator
             'shared'      => 'boolean',
         ],
     ];
-
 
 }

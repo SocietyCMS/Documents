@@ -102,12 +102,18 @@ export default {
 
 
         createPoolModal() {
+            $('.ui.dropdown')
+                .dropdown();
+
             $('#newPool')
                 .modal('setting', 'transition', 'fade up')
                 .modal('show');
         },
 
         permissionPoolModal() {
+            $('.ui.dropdown')
+                .dropdown();
+
             $('#permissionPool')
                 .modal('setting', 'transition', 'fade up')
                 .modal('show');
@@ -136,8 +142,6 @@ export default {
                 });
             }.bind(this)).error(function (data, status, request) {
                 toastr.error(data.errors[0], data.message);
-                this.editMode = null;
-                this.editObject = null;
             }.bind(this));
         },
 
@@ -150,8 +154,6 @@ export default {
 
             }.bind(this)).error(function (data, status, request) {
                 toastr.error(data.errors[0], data.message);
-                this.editMode = null;
-                this.editObject = null;
             }.bind(this));
         },
 
@@ -159,6 +161,9 @@ export default {
         fileUploadStart: function () {
         },
         fileUploadComplete: function (id, name, responseJSON) {
+            if(!responseJSON.success){
+                return toastr.error(responseJSON.message);
+            }
             if (responseJSON.data.uid) {
                 this.objects.push(responseJSON.data);
                 this.meta.objects.files++;
@@ -168,7 +173,6 @@ export default {
         },
         fileUploadAllComplete: function (responseJSON) {
         },
-
 
         createFolder: function (object, event) {
             event.preventDefault();
@@ -187,10 +191,7 @@ export default {
                 this.selectedPool.objects.folder++;
 
             }.bind(this)).error(function (data, status, request) {
-                console.log(data, status, request);
-                toastr.error(data.errors[0], data.message);
-                this.editMode = null;
-                this.editObject = null;
+                toastr.error(data.message);
             }.bind(this));
         }
 

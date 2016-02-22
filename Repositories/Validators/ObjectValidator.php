@@ -11,7 +11,6 @@ use Prettus\Validator\Contracts\ValidatorInterface;
  */
 class ObjectValidator extends BaseValidator
 {
-
     /**
      * Specify validation rules
      * @var array
