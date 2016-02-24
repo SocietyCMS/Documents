@@ -24,7 +24,7 @@ export default {
                 })
             }
 
-            return window.open(object.downloadUrl + '?token='+jwtoken,"_blank")
+            return window.open(object.downloadUrl + '?token='+societycms.jwtoken,"_blank")
         },
     }
 };

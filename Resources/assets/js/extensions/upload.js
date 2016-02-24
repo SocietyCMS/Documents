@@ -22,7 +22,7 @@ export function fineUploaderBasicInstance(VueInstance) {
             endpoint: Vue.url(resourceDocumentsFileStore, {pool: VueInstance.$route.params.pool}),
             inputName: 'data-binary',
             customHeaders: {
-                "Authorization": "Bearer " + jwtoken
+                "Authorization": "Bearer " + societycms.jwtoken
             },
             params: {
                 parent_uid: VueInstance.selectedParent

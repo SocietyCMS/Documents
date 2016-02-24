@@ -41,9 +41,6 @@
         var resourceDocumentsFolderStore = '{{apiRoute('v1', 'api.documents.create_folder', ['pool' => ':pool'])}}';
 
         var resourceDocumentsPoolListFolder = '{{apiRoute('v1', 'api.documents.list_folder', ['pool' => ':uid'])}}';
-
-
-        var jwtoken = '{{$jwtoken}}';
     </script>
     <script src="{{\Pingpong\Modules\Facades\Module::asset('documents:bundle.js')}}"></script>
 
