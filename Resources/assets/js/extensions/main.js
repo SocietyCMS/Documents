@@ -11,6 +11,8 @@ export default {
             selectedPool:null,
             selectedParent: null,
 
+            editObject: null,
+
             newPool: {
                 title: null,
                 quota: 209715200,
@@ -49,12 +51,6 @@ export default {
             resource.get({uid: this.selectedPool.uid}, {parent_uid: this.selectedParent}).then(function (response) {
                 this.objects = response.data.data;
                 this.meta = response.data.meta;
-
-                this.$nextTick(function () {
-                    $('.ui.dropdown')
-                        .dropdown();
-                })
-
             }.bind(this), function (response) {
                 toastr.error(response.data.message, 'Error: ' + response.data.status_code);
             }.bind(this));
@@ -192,7 +188,10 @@ export default {
             var resource = this.$resource(resourceDocumentsFolderStore);
             resource.save({pool: this.selectedPool.uid}, newFolder, function (data, status, request) {
 
-                this.objects.push(data.data);
+                var index = this.objects.push(data.data);
+
+                this.objects[index-1].editing = true;
+
                 this.meta.objects.folder++;
                 this.selectedPool.objects.folder++;
 
@@ -200,6 +199,5 @@ export default {
                 toastr.error(data.message);
             }.bind(this));
         }
-
     }
 };

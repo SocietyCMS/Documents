@@ -27,19 +27,27 @@
 
         <tr class="object" v-bind:class="{'negative':object.deleted}" v-for="object in objects | filterBy filterKey | advancedSort sortKey sortReverse">
             <td class="selectable">
-                <a href="" v-on:click="objectOpen(object, $event)">
+                <a v-if="editObject != object" href="" v-on:click="objectOpen(object, $event)">
                     <i v-bind:class="object.mimeType | semanticFileTypeClass" class="icon"></i>
 
-                    <div class="ui text" v-if="editObject != object">{{ object.title }} <span
-                            class="ui gray text"
-                            v-if="object.fileExtension">.{{ object.fileExtension }}</span>
-                    </div>
-                    <div class="ui input" v-else>
-                        <input type="text" v-model="object.title" v-on:blur="objectBlurEdit(object, $event)"
-                               v-on:keydown="objectKeydownEdit(object, $event)" id="objectEditInput-{{object.uid}}">
+                    <div class="ui text">{{ object.title }}
+                        <span class="ui gray text"
+                            v-if="object.fileExtension">.{{ object.fileExtension }}
+                        </span>
                     </div>
 
                 </a>
+
+                <div class="ui right action left icon input" v-else>
+                    <i v-bind:class="object.mimeType | semanticFileTypeClass" class="icon"></i>
+                    <input type="text" id="objectEditInput-{{object.uid}}"
+                           v-model="object.title"
+                           v-on:blur="objectBlurEdit(object, $event)"
+                           v-on:keydown="objectKeydownEdit(object, $event)" >
+                    <div class="ui icon button" v-on:click="objectBlurEdit(object, $event)">
+                        <i class="checkmark icon"></i>
+                    </div>
+                </div>
             </td>
             <td class="collapsing">
 

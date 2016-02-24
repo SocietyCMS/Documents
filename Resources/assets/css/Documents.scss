@@ -41,6 +41,13 @@
     color: rgba(0,0,0,.95)!important;
   }
 
+  tbody tr td.selectable>.ui.input {
+    padding: .71428571em;
+  }
+  .ui[class*="left icon"].input>input {
+    padding-left: 1.5em!important;
+  }
+
   .object {
 
     .ui.text {

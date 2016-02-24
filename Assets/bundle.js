@@ -140,6 +140,8 @@
 	            selectedPool: null,
 	            selectedParent: null,
 
+	            editObject: null,
+
 	            newPool: {
 	                title: null,
 	                quota: 209715200,
@@ -179,10 +181,6 @@
 	            resource.get({ uid: this.selectedPool.uid }, { parent_uid: this.selectedParent }).then(function (response) {
 	                this.objects = response.data.data;
 	                this.meta = response.data.meta;
-
-	                this.$nextTick(function () {
-	                    $('.ui.dropdown').dropdown();
-	                });
 	            }.bind(this), function (response) {
 	                toastr.error(response.data.message, 'Error: ' + response.data.status_code);
 	            }.bind(this));
@@ -310,14 +308,16 @@
 	            var resource = this.$resource(resourceDocumentsFolderStore);
 	            resource.save({ pool: this.selectedPool.uid }, newFolder, function (data, status, request) {
 
-	                this.objects.push(data.data);
+	                var index = this.objects.push(data.data);
+
+	                this.objects[index - 1].editing = true;
+
 	                this.meta.objects.folder++;
 	                this.selectedPool.objects.folder++;
 	            }.bind(this)).error(function (data, status, request) {
 	                toastr.error(data.message);
 	            }.bind(this));
 	        }
-
 	    }
 	};
 
@@ -366,7 +366,7 @@
 /* 6 */
 /***/ function(module, exports) {
 
-	module.exports = "\n<div class=\"ui pool list\">\n    <div class=\"item\">\n        <i class=\"home icon\"></i>\n\n           <i class=\"minus square outline icon\" v-if=\"selected == pool\"></i>\n           <i class=\"plus square outline icon\" v-else></i>\n\n       <div class=\"content\">\n           <a v-link=\"{ name: 'path', params: { pool: pool.uid, parent_uid: 'null'}}\" class=\"header\">{{pool.title}}</a>\n        </div>\n    </div>\n</div>\n\n";
+	module.exports = "\n    <div class=\"ui pool list\">\n        <div class=\"item\">\n            <i class=\"home icon\"></i>\n\n               <i class=\"minus square outline icon\" v-if=\"selected == pool\"></i>\n               <i class=\"plus square outline icon\" v-else></i>\n\n           <div class=\"content\">\n               <a v-link=\"{ name: 'path', params: { pool: pool.uid, parent_uid: 'null'}}\" class=\"header\">{{pool.title}}</a>\n        </div>\n    </div>\n\n</template>";
 
 /***/ },
 /* 7 */
@@ -456,12 +456,26 @@
 	    data: function data() {
 	        return {
 	            sortKey: 'title',
-	            sortReverse: 1
+	            sortReverse: 1,
+
+	            editObject: null
 	        };
 	    },
 
 	    template: _list2.default.template,
 	    props: ['pool', 'objects'],
+	    watch: {
+	        'objects': function objects() {
+	            if (this.objects[this.objects.length - 1] && this.objects[this.objects.length - 1].editing == true) {
+	                this.objects[this.objects.length - 1].editing = false;
+	                this.objectEdit(this.objects[this.objects.length - 1]);
+	            }
+
+	            this.$nextTick(function () {
+	                $('.ui.dropdown').dropdown();
+	            });
+	        }
+	    },
 	    methods: {
 	        'sortBy': function sortBy(sortKey) {
 	            this.sortReverse = this.sortKey == sortKey ? this.sortReverse * -1 : 1;
@@ -478,6 +492,56 @@
 	            }
 
 	            return window.open(object.downloadUrl + '?token=' + societycms.jwtoken, "_blank");
+	        },
+
+	        objectEdit: function objectEdit(object, event) {
+	            this.editObject = object;
+	            this.editMode = 'rename';
+
+	            setTimeout(function () {
+	                $('#objectEditInput-' + object.uid).focus();
+	            }, 50);
+	        },
+	        objectBlurEdit: function objectBlurEdit(object, event) {
+	            event.preventDefault();
+
+	            if (this.editObject == null || this.editMode != 'rename') {
+	                return;
+	            }
+
+	            var resource = this.$resource(resourceDocumentsFileUpdate);
+	            resource.update({ pool: this.pool.uid }, this.editObject, function (data, status, request) {
+	                this.editMode = null;
+	                this.editObject = null;
+	            }.bind(this)).error(function (data, status, request) {
+	                toastr.error(data.errors[0], 'Error: ' + data.message);
+	            });
+	        },
+	        objectKeydownEdit: function objectKeydownEdit(object, event) {
+	            if (event.which == 13) {
+	                this.objectBlurEdit(object, event);
+	            }
+	        },
+
+	        objectDelete: function objectDelete(object, event) {
+	            event.preventDefault();
+
+	            var resource = this.$resource(resourceDocumentsFileDestroy);
+	            resource.delete({ pool: this.pool.uid }, object, function (data, status, request) {
+	                if (status) {
+	                    if (this.showDeleted) {
+	                        object.deleted = true;
+	                    } else {
+	                        this.objects.$remove(object);
+	                    }
+
+	                    if (object.tag == 'file') {
+	                        this.pool.objects.files--;
+	                    }
+	                }
+	            }.bind(this)).error(function (data, status, request) {
+	                toastr.error(data.errors[0], 'Error: ' + data.message);
+	            });
 	        }
 	    }
 	};
@@ -509,7 +573,7 @@
 /* 12 */
 /***/ function(module, exports) {
 
-	module.exports = "\n\n\n<table class=\"ui selectable table\" id=\"file-list-table\">\n    <thead>\n    <tr>\n        <th class=\"therteen wide filename\"\n            v-on:click=\"sortBy('title')\"\n            v-bind:class=\"{ 'sorted': sortKey == 'tag', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Title\n        </th>\n        <th class=\"\">\n        </th>\n        <th class=\"one wide right aligned\"\n            v-on:click=\"sortBy('objectSize')\"\n            v-bind:class=\"{ 'sorted': sortKey == 'objectSize', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Size\n        </th>\n        <th class=\"two wide right aligned\"\n            v-on:click=\"sortBy('created_at.timestamp')\"\n            v-bind:class=\"{ 'sorted': sortKey == 'created_at.timestamp', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Modified\n        </th>\n    </tr>\n    </thead>\n    <tbody>\n\n    <tr class=\"object\" v-bind:class=\"{'negative':object.deleted}\" v-for=\"object in objects | filterBy filterKey | advancedSort sortKey sortReverse\">\n        <td class=\"selectable\">\n            <a href=\"\" v-on:click=\"objectOpen(object, $event)\">\n                <i v-bind:class=\"object.mimeType | semanticFileTypeClass\" class=\"icon\"></i>\n\n                <div class=\"ui text\" v-if=\"editObject != object\">{{ object.title }} <span\n                        class=\"ui gray text\"\n                        v-if=\"object.fileExtension\">.{{ object.fileExtension }}</span>\n                </div>\n                <div class=\"ui input\" v-else>\n                    <input type=\"text\" v-model=\"object.title\" v-on:blur=\"objectBlurEdit(object, $event)\"\n                           v-on:keydown=\"objectKeydownEdit(object, $event)\" id=\"objectEditInput-{{object.uid}}\">\n                </div>\n\n            </a>\n        </td>\n        <td class=\"collapsing\">\n\n            <button class=\"circular ui icon positive button\" v-if=\"object.deleted\" v-on:click=\"objectRestore(object, $event)\"><i class=\"life ring icon\"></i></button>\n            <button class=\"circular ui icon negative button\" v-if=\"object.deleted\" v-on:click=\"objectForceDelete(object, $event)\"><i class=\"trash icon\"></i></button>\n\n            <button class=\"circular ui icon button\" v-if=\"!object.deleted\"><i class=\"share alternate icon\"></i></button>\n\n            <div class=\"ui top left pointing dropdown\" v-if=\"!object.deleted\">\n                <button class=\"circular ui icon button\"><i class=\"ellipsis horizontal icon\"></i></button>\n\n                <div class=\"menu\">\n                    <div class=\"item\" v-on:click=\"objectOpen(object, $event)\">\n                        Open...\n                    </div>\n                    <div class=\"item\" v-on:click=\"objectEdit(object, $event)\">\n                        Rename\n                    </div>\n                    <div class=\"item\">\n                        <i class=\"folder icon\"></i>\n                        Move to folder\n                    </div>\n                    <div class=\"item\" v-on:click=\"objectDelete(object, $event)\">\n                        <i class=\"trash icon\"></i>\n                        Move to trash\n                    </div>\n                </div>\n            </div>\n\n        </td>\n        <td class=\"right aligned collapsing\" v-if=\"object.tag == 'file'\">{{ object.objectSize | humanReadableFilesize }}</td>\n        <td class=\"right aligned collapsing\" v-if=\"object.tag == 'folder'\">-</td>\n        <td class=\"right aligned collapsing\">{{ object.created_at.diffForHumans }}</td>\n    </tr>\n    </tbody>\n</table>\n\n";
+	module.exports = "\n\n\n<table class=\"ui selectable table\" id=\"file-list-table\">\n    <thead>\n    <tr>\n        <th class=\"therteen wide filename\"\n            v-on:click=\"sortBy('title')\"\n            v-bind:class=\"{ 'sorted': sortKey == 'tag', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Title\n        </th>\n        <th class=\"\">\n        </th>\n        <th class=\"one wide right aligned\"\n            v-on:click=\"sortBy('objectSize')\"\n            v-bind:class=\"{ 'sorted': sortKey == 'objectSize', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Size\n        </th>\n        <th class=\"two wide right aligned\"\n            v-on:click=\"sortBy('created_at.timestamp')\"\n            v-bind:class=\"{ 'sorted': sortKey == 'created_at.timestamp', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Modified\n        </th>\n    </tr>\n    </thead>\n    <tbody>\n\n    <tr class=\"object\" v-bind:class=\"{'negative':object.deleted}\" v-for=\"object in objects | filterBy filterKey | advancedSort sortKey sortReverse\">\n        <td class=\"selectable\">\n            <a v-if=\"editObject != object\" href=\"\" v-on:click=\"objectOpen(object, $event)\">\n                <i v-bind:class=\"object.mimeType | semanticFileTypeClass\" class=\"icon\"></i>\n\n                <div class=\"ui text\">{{ object.title }}\n                    <span class=\"ui gray text\"\n                        v-if=\"object.fileExtension\">.{{ object.fileExtension }}\n                    </span>\n                </div>\n\n            </a>\n\n            <div class=\"ui right action left icon input\" v-else>\n                <i v-bind:class=\"object.mimeType | semanticFileTypeClass\" class=\"icon\"></i>\n                <input type=\"text\" id=\"objectEditInput-{{object.uid}}\"\n                       v-model=\"object.title\"\n                       v-on:blur=\"objectBlurEdit(object, $event)\"\n                       v-on:keydown=\"objectKeydownEdit(object, $event)\" >\n                <div class=\"ui icon button\" v-on:click=\"objectBlurEdit(object, $event)\">\n                    <i class=\"checkmark icon\"></i>\n                </div>\n            </div>\n        </td>\n        <td class=\"collapsing\">\n\n            <button class=\"circular ui icon positive button\" v-if=\"object.deleted\" v-on:click=\"objectRestore(object, $event)\"><i class=\"life ring icon\"></i></button>\n            <button class=\"circular ui icon negative button\" v-if=\"object.deleted\" v-on:click=\"objectForceDelete(object, $event)\"><i class=\"trash icon\"></i></button>\n\n            <button class=\"circular ui icon button\" v-if=\"!object.deleted\"><i class=\"share alternate icon\"></i></button>\n\n            <div class=\"ui top left pointing dropdown\" v-if=\"!object.deleted\">\n                <button class=\"circular ui icon button\"><i class=\"ellipsis horizontal icon\"></i></button>\n\n                <div class=\"menu\">\n                    <div class=\"item\" v-on:click=\"objectOpen(object, $event)\">\n                        Open...\n                    </div>\n                    <div class=\"item\" v-on:click=\"objectEdit(object, $event)\">\n                        Rename\n                    </div>\n                    <div class=\"item\">\n                        <i class=\"folder icon\"></i>\n                        Move to folder\n                    </div>\n                    <div class=\"item\" v-on:click=\"objectDelete(object, $event)\">\n                        <i class=\"trash icon\"></i>\n                        Move to trash\n                    </div>\n                </div>\n            </div>\n\n        </td>\n        <td class=\"right aligned collapsing\" v-if=\"object.tag == 'file'\">{{ object.objectSize | humanReadableFilesize }}</td>\n        <td class=\"right aligned collapsing\" v-if=\"object.tag == 'folder'\">-</td>\n        <td class=\"right aligned collapsing\">{{ object.created_at.diffForHumans }}</td>\n    </tr>\n    </tbody>\n</table>\n\n";
 
 /***/ },
 /* 13 */
@@ -615,7 +679,7 @@
 
 
 	// module
-	exports.push([module.id, "/*******************************\n         Site Settings\n*******************************/\n/*-------------------\n       Fonts\n--------------------*/\n/*-------------------\n      Base Sizes\n--------------------*/\n/* This is the single variable that controls them all */\n/* The size of page text  */\n/*-------------------\n    Border Radius\n--------------------*/\n/* See Power-user section below\n   for explanation of $px variables\n*/\n/*-------------------\n    Brand Colors\n--------------------*/\n/*--------------\n  Page Heading\n---------------*/\n/*--------------\n   Form Input\n---------------*/\n/* This adjusts the default form input across all elements */\n/* Line Height Default For Inputs in Browser */\n/*-------------------\n    Focused Input\n--------------------*/\n/* Used on inputs, textarea etc */\n/* Used on dropdowns, other larger blocks */\n/*-------------------\n        Sizes\n--------------------*/\n/*\n  Sizes are all expressed in terms of 14px/em (default em)\n  This ensures these \"ratios\" remain constant despite changes in EM\n*/\n/*-------------------\n        Page\n--------------------*/\n/*-------------------\n      Paragraph\n--------------------*/\n/*-------------------\n       Links\n--------------------*/\n/*-------------------\n  Highlighted Text\n--------------------*/\n/*-------------------\n       Loader\n--------------------*/\n/*-------------------\n        Grid\n--------------------*/\n/*-------------------\n     Transitions\n--------------------*/\n/*-------------------\n     Breakpoints\n--------------------*/\n/*-------------------\n      Site Colors\n--------------------*/\n/*---  Colors  ---*/\n/*---  Light Colors  ---*/\n/*---   Neutrals  ---*/\n/*--- Colored Backgrounds ---*/\n/*--- Colored Headers ---*/\n/*--- Colored Text ---*/\n//: #8ABC1E;\n//: #1EBC30;\n//: #10A3A3;\n//: #2185D0;\n/*-------------------\n     Alpha Colors\n--------------------*/\n/*-------------------\n       Accents\n--------------------*/\n/* Differentiating Neutrals */\n/* Differentiating Layers */\n/*******************************\n           Power-User\n*******************************/\n/*-------------------\n    Emotive Colors\n--------------------*/\n/* Positive */\n/* Negative */\n/* Info */\n/* Warning */\n/*-------------------\n        Paths\n--------------------*/\n/* For source only. Modified in gulp for dist */\n/*-------------------\n       Em Sizes\n--------------------*/\n/*\n  This rounds $size values to the closest pixel then expresses that value in (r)em.\n  This ensures all size values round to exact pixels\n*/\n/* em */\n/* rem */\n/*-------------------\n       Icons\n--------------------*/\n/* Maximum Glyph Width of Icon */\n/*-------------------\n     Neutral Text\n--------------------*/\n/*-------------------\n     Brand Colors\n--------------------*/\n/*-------------------\n      Borders\n--------------------*/\n/*-------------------\n    Derived Values\n--------------------*/\n/* Loaders Position Offset */\n/* Rendered Scrollbar Width */\n/* Maximum Single Character Glyph Width, aka Capital \"W\" */\n/* Used to match floats with text */\n/* Header Spacing */\n/* Minimum Mobile Width */\n/* Positive / Negative Dupes */\n/* Responsive */\n/* Columns */\n/*******************************\n             States\n*******************************/\n/*-------------------\n      Disabled\n--------------------*/\n/*-------------------\n        Hover\n--------------------*/\n/*---  Colors  ---*/\n/*---  Emotive  ---*/\n/*---  Brand   ---*/\n/*---  Dark Tones  ---*/\n/*---  Light Tones  ---*/\n/*-------------------\n        Focus\n--------------------*/\n/*---  Colors  ---*/\n/*---  Emotive  ---*/\n/*---  Brand   ---*/\n/*---  Dark Tones  ---*/\n/*---  Light Tones  ---*/\n/*-------------------\n    Down (:active)\n--------------------*/\n/*---  Colors  ---*/\n/*---  Emotive  ---*/\n/*---  Brand   ---*/\n/*---  Dark Tones  ---*/\n/*---  Light Tones  ---*/\n/*-------------------\n        Active\n--------------------*/\n/*---  Colors  ---*/\n/*---  Emotive  ---*/\n/*---  Brand   ---*/\n/*---  Dark Tones  ---*/\n/*---  Light Tones  ---*/\n\n.ui.segment.fileBrowser {\n  padding: 0;\n\n}\n\n.ui.segment.fileBrowser .treeView {\n  margin: 0;\n  padding: 1em;\n  background-color: #FFFFFF;\n  overflow: hidden;\n  border-right: 1px solid #DCDDDE;\n\n}\n\n.ui.segment.fileBrowser .treeView .list.pool {\n  margin: 0;\n\n}\n\n.ui.segment.fileBrowser .fileView {\n  padding: 0;\n  min-height: 20em;\n\n}\n\n\n.ui.menu.fileMenu .item>.button {\n  margin: -.5em .25em;\n\n}\n\n\n.ui.menu.fileMenu .ui.breadcrumb.item:before {\n  display: none;\n\n}\n\n#file-list-table {\n  border:none;\n  border-radius:0;\n}\n\n#file-list-table tbody tr td.selectable:hover {\n  background: none!important;\n  color: rgba(0,0,0,.95)!important;\n\n}\n\n#file-list-table .object .ui.text {\n  display: -webkit-inline-box;\n  display: -webkit-inline-flex;\n  display: -ms-inline-flexbox;\n  display: inline-flex;\n\n}\n\n#file-list-table .object .ui.input {\n  min-width: 50%;\n\n}\n", ""]);
+	exports.push([module.id, "/*******************************\n         Site Settings\n*******************************/\n/*-------------------\n       Fonts\n--------------------*/\n/*-------------------\n      Base Sizes\n--------------------*/\n/* This is the single variable that controls them all */\n/* The size of page text  */\n/*-------------------\n    Border Radius\n--------------------*/\n/* See Power-user section below\n   for explanation of $px variables\n*/\n/*-------------------\n    Brand Colors\n--------------------*/\n/*--------------\n  Page Heading\n---------------*/\n/*--------------\n   Form Input\n---------------*/\n/* This adjusts the default form input across all elements */\n/* Line Height Default For Inputs in Browser */\n/*-------------------\n    Focused Input\n--------------------*/\n/* Used on inputs, textarea etc */\n/* Used on dropdowns, other larger blocks */\n/*-------------------\n        Sizes\n--------------------*/\n/*\n  Sizes are all expressed in terms of 14px/em (default em)\n  This ensures these \"ratios\" remain constant despite changes in EM\n*/\n/*-------------------\n        Page\n--------------------*/\n/*-------------------\n      Paragraph\n--------------------*/\n/*-------------------\n       Links\n--------------------*/\n/*-------------------\n  Highlighted Text\n--------------------*/\n/*-------------------\n       Loader\n--------------------*/\n/*-------------------\n        Grid\n--------------------*/\n/*-------------------\n     Transitions\n--------------------*/\n/*-------------------\n     Breakpoints\n--------------------*/\n/*-------------------\n      Site Colors\n--------------------*/\n/*---  Colors  ---*/\n/*---  Light Colors  ---*/\n/*---   Neutrals  ---*/\n/*--- Colored Backgrounds ---*/\n/*--- Colored Headers ---*/\n/*--- Colored Text ---*/\n//: #8ABC1E;\n//: #1EBC30;\n//: #10A3A3;\n//: #2185D0;\n/*-------------------\n     Alpha Colors\n--------------------*/\n/*-------------------\n       Accents\n--------------------*/\n/* Differentiating Neutrals */\n/* Differentiating Layers */\n/*******************************\n           Power-User\n*******************************/\n/*-------------------\n    Emotive Colors\n--------------------*/\n/* Positive */\n/* Negative */\n/* Info */\n/* Warning */\n/*-------------------\n        Paths\n--------------------*/\n/* For source only. Modified in gulp for dist */\n/*-------------------\n       Em Sizes\n--------------------*/\n/*\n  This rounds $size values to the closest pixel then expresses that value in (r)em.\n  This ensures all size values round to exact pixels\n*/\n/* em */\n/* rem */\n/*-------------------\n       Icons\n--------------------*/\n/* Maximum Glyph Width of Icon */\n/*-------------------\n     Neutral Text\n--------------------*/\n/*-------------------\n     Brand Colors\n--------------------*/\n/*-------------------\n      Borders\n--------------------*/\n/*-------------------\n    Derived Values\n--------------------*/\n/* Loaders Position Offset */\n/* Rendered Scrollbar Width */\n/* Maximum Single Character Glyph Width, aka Capital \"W\" */\n/* Used to match floats with text */\n/* Header Spacing */\n/* Minimum Mobile Width */\n/* Positive / Negative Dupes */\n/* Responsive */\n/* Columns */\n/*******************************\n             States\n*******************************/\n/*-------------------\n      Disabled\n--------------------*/\n/*-------------------\n        Hover\n--------------------*/\n/*---  Colors  ---*/\n/*---  Emotive  ---*/\n/*---  Brand   ---*/\n/*---  Dark Tones  ---*/\n/*---  Light Tones  ---*/\n/*-------------------\n        Focus\n--------------------*/\n/*---  Colors  ---*/\n/*---  Emotive  ---*/\n/*---  Brand   ---*/\n/*---  Dark Tones  ---*/\n/*---  Light Tones  ---*/\n/*-------------------\n    Down (:active)\n--------------------*/\n/*---  Colors  ---*/\n/*---  Emotive  ---*/\n/*---  Brand   ---*/\n/*---  Dark Tones  ---*/\n/*---  Light Tones  ---*/\n/*-------------------\n        Active\n--------------------*/\n/*---  Colors  ---*/\n/*---  Emotive  ---*/\n/*---  Brand   ---*/\n/*---  Dark Tones  ---*/\n/*---  Light Tones  ---*/\n\n.ui.segment.fileBrowser {\n  padding: 0;\n\n}\n\n.ui.segment.fileBrowser .treeView {\n  margin: 0;\n  padding: 1em;\n  background-color: #FFFFFF;\n  overflow: hidden;\n  border-right: 1px solid #DCDDDE;\n\n}\n\n.ui.segment.fileBrowser .treeView .list.pool {\n  margin: 0;\n\n}\n\n.ui.segment.fileBrowser .fileView {\n  padding: 0;\n  min-height: 20em;\n\n}\n\n\n.ui.menu.fileMenu .item>.button {\n  margin: -.5em .25em;\n\n}\n\n\n.ui.menu.fileMenu .ui.breadcrumb.item:before {\n  display: none;\n\n}\n\n#file-list-table {\n  border:none;\n  border-radius:0;\n}\n\n#file-list-table tbody tr td.selectable:hover {\n  background: none!important;\n  color: rgba(0,0,0,.95)!important;\n\n}\n\n#file-list-table tbody tr td.selectable>.ui.input {\n  padding: .71428571em;\n\n}\n\n#file-list-table .ui[class*=\"left icon\"].input>input {\n  padding-left: 1.5em!important;\n\n}\n\n#file-list-table .object .ui.text {\n  display: -webkit-inline-box;\n  display: -webkit-inline-flex;\n  display: -ms-inline-flexbox;\n  display: inline-flex;\n\n}\n\n#file-list-table .object .ui.input {\n  min-width: 50%;\n\n}\n", ""]);
 
 	// exports
 

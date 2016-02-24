@@ -37,6 +37,8 @@
 
 
         var resourceDocumentsFileStore = '{{apiRoute('v1', 'api.documents.file.store', ['pool' => ':pool'])}}';
+        var resourceDocumentsFileUpdate = '{{apiRoute('v1', 'api.documents.file.update', ['pool' => ':pool'])}}';
+        var resourceDocumentsFileDestroy = '{{apiRoute('v1', 'api.documents.file.destroy', ['pool' => ':pool'])}}';
 
         var resourceDocumentsFolderStore = '{{apiRoute('v1', 'api.documents.create_folder', ['pool' => ':pool'])}}';
 
