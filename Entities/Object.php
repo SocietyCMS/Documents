@@ -54,6 +54,11 @@ class Object extends Model
 
 
     /**
+     * @var array
+     */
+    protected static $recordEvents = ['created'];
+
+    /**
      * Get the pool that this object belongs to.
      */
     public function getFQPath()
