@@ -38,7 +38,7 @@ class SidebarExtender implements \Maatwebsite\Sidebar\SidebarExtender
 
                 $item->route('backend::documents.documents.index');
                 $item->authorize(
-                    $this->auth->hasAccess('documents.documents.index')
+                    $this->auth->can('documents::access-documents')
                 );
             });
 
