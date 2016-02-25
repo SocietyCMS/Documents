@@ -47,7 +47,7 @@ module.exports = {
             module: 'Documents'
         }),
         new WebpackNotifierPlugin({
-            title: 'SodietyCMS: Documents',
+            title: 'SocietyCMS: Documents',
             alwaysNotify: true
         })
     ]

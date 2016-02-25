@@ -44,7 +44,7 @@
                            v-model="object.title"
                            v-on:blur="objectBlurEdit(object, $event)"
                            v-on:keydown="objectKeydownEdit(object, $event)" >
-                    <div class="ui icon button" v-on:click="objectBlurEdit(object, $event)">
+                    <div class="ui icon primary button" v-on:click="objectBlurEdit(object, $event)">
                         <i class="checkmark icon"></i>
                     </div>
                 </div>
@@ -54,7 +54,7 @@
                 <button class="circular ui icon positive button" v-if="object.deleted" v-on:click="objectRestore(object, $event)"><i class="life ring icon"></i></button>
                 <button class="circular ui icon negative button" v-if="object.deleted" v-on:click="objectForceDelete(object, $event)"><i class="trash icon"></i></button>
 
-                <button class="circular ui icon button" v-if="!object.deleted"><i class="share alternate icon"></i></button>
+                <button class="circular ui icon disabled button" v-if="!object.deleted"><i class="share alternate icon "></i></button>
 
                 <div class="ui top left pointing dropdown" v-if="!object.deleted">
                     <button class="circular ui icon button"><i class="ellipsis horizontal icon"></i></button>
@@ -65,10 +65,6 @@
                         </div>
                         <div class="item" v-on:click="objectEdit(object, $event)">
                             Rename
-                        </div>
-                        <div class="item">
-                            <i class="folder icon"></i>
-                            Move to folder
                         </div>
                         <div class="item" v-on:click="objectDelete(object, $event)">
                             <i class="trash icon"></i>

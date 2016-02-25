@@ -47,7 +47,8 @@ export default {
             this.editMode = 'rename';
 
             setTimeout(function () {
-                    $('#objectEditInput-'+object.uid).focus()
+                    $('#objectEditInput-'+object.uid).focus();
+                    $('#objectEditInput-'+object.uid).select();
                 }
                 , 50);
         },

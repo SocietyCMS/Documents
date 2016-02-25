@@ -42,13 +42,13 @@
             <i class="list layout icon button"></i>
         </button>
 
-        <button class="circular ui icon basic button">
+        <button class="circular ui icon basic disabled button">
             <i class="grid layout icon button"></i>
         </button>
     </div>
 
     <div class="ui right aligned category search item">
-        <div class="ui transparent icon input">
+        <div class="ui transparent icon disabled input">
             <input class="prompt" type="text" placeholder="Search...">
             <i class="search link icon"></i>
         </div>
