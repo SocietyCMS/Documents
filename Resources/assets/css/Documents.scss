@@ -1,0 +1,62 @@
+@import "../../../../../themes/societyadmin/variables.scss";
+
+.ui.segment.fileBrowser {
+  padding: 0;
+
+  .treeView {
+    margin: 0;
+    padding: 1em;
+    background-color: $white;
+    overflow: hidden;
+    border-right: 1px solid $lightGrey;
+
+    .list.pool {
+      margin: 0;
+    }
+  }
+
+  .fileView {
+    padding: 0;
+    min-height: 20em;
+  }
+
+}
+
+
+.ui.menu.fileMenu {
+   .item>.button {
+     margin: -.5em .25em;
+   }
+  .ui.breadcrumb.item:before {
+    display: none;
+  }
+}
+
+#file-list-table {
+  border:none;
+  border-radius:0;
+
+  tbody tr td.selectable:hover {
+    background: none!important;
+    color: rgba(0,0,0,.95)!important;
+  }
+
+  tbody tr td.selectable>.ui.input {
+    padding: .71428571em;
+  }
+  .ui[class*="left icon"].input>input {
+    padding-left: 1.5em!important;
+  }
+
+  .object {
+
+    .ui.text {
+      display: inline-flex;
+    }
+
+    .ui.input {
+      min-width: 50%;
+    }
+
+  }
+}

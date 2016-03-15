@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Modules\Core\Http\Controllers\ApiBaseController;
 use Modules\Documents\Exceptions\QuotaExceededException;
+use Modules\Documents\Http\Requests\ApiRequest;
 use Modules\Documents\Repositories\Criterias\PoolCriteria;
 use Modules\Documents\Repositories\Criterias\withTrashCriteria;
 use Modules\Documents\Repositories\ObjectRepository;
@@ -53,8 +54,8 @@ class FileController extends ApiBaseController
         $this->validator = $this->repository->makeValidator(FileValidator::class);
         $this->repository->pushCriteria(new PoolCriteria($request->pool));
 
-        $this->middleware("permission:documents::pool-{$request->pool}-read", ['only' => ['index', 'get']]);
-        $this->middleware("permission:documents::pool-{$request->pool}-write", ['only' => ['store', 'update', 'destroy', 'forceDestroy', 'restore']]);
+        $this->middleware("permission:documents:unmanaged::pool-{$request->pool}-read", ['only' => ['index', 'get']]);
+        $this->middleware("permission:documents:unmanaged::pool-{$request->pool}-write", ['only' => ['store', 'update', 'destroy', 'forceDestroy', 'restore']]);
 
     }
 
@@ -63,7 +64,7 @@ class FileController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function index(Request $request)
+    public function index(ApiRequest $request)
     {
         $files = $this->repository->paginate(100);
         $meta = [
@@ -78,13 +79,13 @@ class FileController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function store(Request $request)
+    public function store(ApiRequest $request)
     {
         if ($this->validator->with($request->input())->fails(ValidatorInterface::RULE_CREATE)) {
-            throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not create new file.', $this->validator->errors());
+            throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not upload new file.', $this->validator->errors());
         }
         if (is_null($request->file('data-binary'))) {
-            throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not create new file.', ['data-binary is not a file']);
+            throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not upload new file.', ['data-binary is not a file']);
         }
 
         $this->validatePoolQuota($request);
@@ -111,7 +112,7 @@ class FileController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function get(Request $request)
+    public function get(ApiRequest $request)
     {
         $this->repository->pushCriteria(new withTrashCriteria($request->input('with_trash', false)));
         $file = $this->repository->findByUid($request->uid);
@@ -123,7 +124,7 @@ class FileController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function update(Request $request)
+    public function update(ApiRequest $request)
     {
         if ($this->validator->with(array_merge($request->input(), ['uid' => $request->uid]))->fails(ValidatorInterface::RULE_UPDATE)) {
             throw new \Dingo\Api\Exception\UpdateResourceFailedException('Could not update file.', $this->validator->errors());
@@ -148,7 +149,7 @@ class FileController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function destroy(Request $request)
+    public function destroy(ApiRequest $request)
     {
         if ($this->validator->with(array_merge($request->input(), ['uid' => $request->uid]))->fails(ValidatorInterface::RULE_UPDATE)) {
             throw new \Dingo\Api\Exception\DeleteResourceFailedException ('Could not delete file.', $this->validator->errors());
@@ -163,7 +164,7 @@ class FileController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function forceDestroy(Request $request)
+    public function forceDestroy(ApiRequest $request)
     {
         if ($this->validator->with(array_merge($request->input(), ['uid' => $request->uid]))->fails(ValidatorInterface::RULE_UPDATE)) {
             throw new \Dingo\Api\Exception\DeleteResourceFailedException('Could not delete file.', $this->validator->errors());
@@ -180,7 +181,7 @@ class FileController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function restore(Request $request)
+    public function restore(ApiRequest $request)
     {
         if ($this->validator->with(array_merge($request->input(), ['uid' => $request->uid]))->fails(ValidatorInterface::RULE_UPDATE)) {
             throw new \Dingo\Api\Exception\UpdateResourceFailedException ('Could not restore file.', $this->validator->errors());

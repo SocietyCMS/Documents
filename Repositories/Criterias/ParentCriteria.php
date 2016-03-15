@@ -22,7 +22,7 @@ class ParentCriteria implements CriteriaInterface
      */
     public function __construct($parent_uid)
     {
-        $this->parent_uid = empty($parent_uid)?null:$parent_uid;
+        $this->parent_uid = $this->cleanParameters($parent_uid);
     }
 
 
@@ -35,5 +35,13 @@ class ParentCriteria implements CriteriaInterface
     {
         $model = $model->where('parent_uid', '=', $this->parent_uid);
         return $model;
+    }
+
+    private function cleanParameters($parameter)
+    {
+        if(empty($parameter) || $parameter=='null'){
+            return null;
+        }
+        return $parameter;
     }
 }

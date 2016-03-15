@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Modules\Core\Http\Controllers\ApiBaseController;
+use Modules\Documents\Http\Requests\ApiRequest;
 use Modules\Documents\Repositories\Criterias\PoolCriteria;
 use Modules\Documents\Repositories\ObjectRepository;
 
@@ -43,7 +44,7 @@ class DownloadController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function download(Request $request)
+    public function download(ApiRequest $request)
     {
         $file = $this->repository->findByUid($request->file);
         $contents = Storage::disk('storage')->get( 'documents/'.$file->uid);

@@ -38,7 +38,7 @@ class PoolPermissionCriteria implements CriteriaInterface
         $repository->skipCriteria(true);
 
         $uidList = $repository->getUidList()->filter(function ($item) {
-            return $this->user->can(["documents::pool-{$item}-read", "documents::pool-{$item}-write"]);
+            return $this->user->can(["documents:unmanaged::pool-{$item}-read", "documents:unmanaged::pool-{$item}-write"]);
         });
 
         $repository->skipCriteria(false);

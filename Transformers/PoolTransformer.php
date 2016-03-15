@@ -19,9 +19,13 @@ class PoolTransformer extends Fractal\TransformerAbstract
                 'files'   => $pool->objects->where('tag', 'file')->count(),
                 'folders' => $pool->objects->where('tag', 'folder')->count(),
             ],
-            'userPermission' => [
-                'read'  => $this->user()->can("documents::pool-{$pool->uid}-read"),
-                'write' => $this->user()->can("documents::pool-{$pool->uid}-write"),
+            'userPermissions' => [
+                'read'  => $this->user()->can("documents:unmanaged::pool-{$pool->uid}-read"),
+                'write' => $this->user()->can("documents:unmanaged::pool-{$pool->uid}-write"),
+            ],
+            'permissions' => [
+                'read' => $this->rolesByPermission("documents:unmanaged::pool-{$pool->uid}-read"),
+                'write' => $this->rolesByPermission("documents:unmanaged::pool-{$pool->uid}-write"),
             ],
             'deleted'        => (bool)$pool->trashed(),
             'created_at'     => $pool->created_at->toRfc3339String(),
@@ -33,5 +37,11 @@ class PoolTransformer extends Fractal\TransformerAbstract
     private function user()
     {
         return app('Dingo\Api\Auth\Auth')->user();
+    }
+
+    private function rolesByPermission($permission)
+    {
+        $permissionManager = new \Modules\Core\Permissions\PermissionManager();
+        return $permissionManager->getPermission($permission)->roles()->lists('id');
     }
 }

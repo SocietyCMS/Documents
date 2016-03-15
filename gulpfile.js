@@ -3,6 +3,9 @@ var shell = require('gulp-shell');
 var elixir = require('laravel-elixir');
 var moduleInfo = require('./module.json');
 
+require('laravel-elixir-vueify');
+
+
 var Task = elixir.Task;
 
 elixir.extend("PublishModules", function () {

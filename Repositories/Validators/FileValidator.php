@@ -23,7 +23,7 @@ class FileValidator extends BaseValidator
             'shared'      => 'boolean',
         ],
         ValidatorInterface::RULE_UPDATE => [
-            'title'       => 'required|min:3|string',
+            'title'       => 'required|string',
             'description' => 'min:3',
             'shared'      => 'boolean',
         ],

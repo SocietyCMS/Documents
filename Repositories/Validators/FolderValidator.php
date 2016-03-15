@@ -11,7 +11,6 @@ use Prettus\Validator\Contracts\ValidatorInterface;
  */
 class FolderValidator extends BaseValidator
 {
-
     /**
      * Specify validation rules
      * @var array
@@ -30,6 +29,5 @@ class FolderValidator extends BaseValidator
             'shared'      => 'boolean',
         ],
     ];
-
 
 }

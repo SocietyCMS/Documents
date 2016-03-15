@@ -4,6 +4,7 @@ namespace Modules\Documents\Http\Controllers\api;
 
 use Illuminate\Http\Request;
 use Modules\Core\Http\Controllers\ApiBaseController;
+use Modules\Documents\Http\Requests\ApiRequest;
 use Modules\Documents\Repositories\Criterias\PoolPermissionCriteria;
 use Modules\Documents\Repositories\PoolRepository;
 use Modules\Documents\Transformers\PoolTransformer;
@@ -37,6 +38,8 @@ class PoolController extends ApiBaseController
         parent::__construct();
         $this->repository = $repository;
         $this->validator = $this->repository->makeValidator();
+
+        $this->middleware("permission:documents::manage-pools", ['except' => ['index']]);
     }
 
 
@@ -44,25 +47,8 @@ class PoolController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function index(Request $request)
+    public function index(ApiRequest $request)
     {
-        foreach ($this->repository->all() as $item) {
-            $permissionManager = new \Modules\Core\Permissions\PermissionManager();
-            $permissionManager->registerPermission(
-                "documents::pool-{$item->uid}-read",
-                $item->title,
-                $item->description,
-                "documents"
-            );
-
-            $permissionManager->registerPermission(
-                "documents::pool-{$item->uid}-write",
-                $item->title,
-                $item->description,
-                "documents"
-            );
-        }
-
         $this->repository->pushCriteria(new PoolPermissionCriteria($this->auth->user()));
         $this->repository->skipCache(true);
         $pools = $this->repository->paginate();
@@ -75,17 +61,19 @@ class PoolController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function store(Request $request)
+    public function store(ApiRequest $request)
     {
         if ($this->validator->with($request->input())->fails(ValidatorInterface::RULE_CREATE)) {
             throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not create new pool.', $this->validator->errors());
         }
 
         $pool = $this->repository->create([
-            'title'       => $request->title,
+            'title' => $request->title,
             'description' => $request->description,
-            'quota'       => $request->quota,
+            'quota' => $request->quota,
         ]);
+
+        $this->registerPoolPermissins($request, $pool);
 
         return $this->response->item($pool, new PoolTransformer());
     }
@@ -95,7 +83,7 @@ class PoolController extends ApiBaseController
      * @param         $pool
      * @return mixed
      */
-    public function get(Request $request)
+    public function get(ApiRequest $request)
     {
         $pool = $this->repository->findByUid($request->pool);
 
@@ -106,7 +94,7 @@ class PoolController extends ApiBaseController
      * @param Request $request
      * @return mixed
      */
-    public function update(Request $request)
+    public function update(ApiRequest $request)
     {
         if ($this->validator->with(array_merge($request->input(), ['uid' => $request->pool]))->fails(ValidatorInterface::RULE_UPDATE)) {
             throw new \Dingo\Api\Exception\StoreResourceFailedException('Could not create new pool.', $this->validator->errors());
@@ -114,10 +102,12 @@ class PoolController extends ApiBaseController
 
         $pool_id = $this->repository->findByUid($request->pool)->id;
         $item = $this->repository->update([
-            'title'       => $request->title,
+            'title' => $request->title,
             'description' => $request->description,
-            'quota'       => $request->quota,
+            'quota' => $request->quota,
         ], $pool_id);
+
+        $this->syncPoolPermissins($request, $item);
 
         return $this->response->item($item, new PoolTransformer());
     }
@@ -127,12 +117,63 @@ class PoolController extends ApiBaseController
      * @param         $pool
      * @return mixed
      */
-    public function destroy(Request $request)
+    public function destroy(ApiRequest $request)
     {
         $pool = $this->repository->findByUid($request->pool);
 
         $pool->delete();
 
         return $this->successDeleted();
+    }
+
+
+    /**
+     * Register Permission for a pool
+     *
+     * @param $pool
+     */
+    protected function registerPoolPermissins(Request $request, $pool)
+    {
+        $permissionManager = new \Modules\Core\Permissions\PermissionManager();
+
+        $readRole = $permissionManager->registerPermission(
+            "documents:unmanaged::pool-{$pool->uid}-read",
+            $pool->title,
+            $pool->description,
+            "documents"
+        );
+        $readRole->roles()->sync($request->readRoles);
+
+        $writeRole = $permissionManager->registerPermission(
+            "documents:unmanaged::pool-{$pool->uid}-write",
+            $pool->title,
+            $pool->description,
+            "documents"
+        );
+        $writeRole->roles()->sync($request->writeRoles);
+    }
+
+    /**
+     * Sync Permission for a pool
+     *
+     * @param $pool
+     */
+    protected function syncPoolPermissins(Request $request, $pool)
+    {
+        $permissionManager = new \Modules\Core\Permissions\PermissionManager();
+
+        $readRole = $permissionManager->getPermission("documents:unmanaged::pool-{$pool->uid}-read");
+        if (isset($request->permissions['read'])) {
+            $readRole->roles()->sync($request->permissions['read']);
+        } else {
+            $readRole->roles()->detach();
+        }
+
+        $writeRole = $permissionManager->getPermission("documents:unmanaged::pool-{$pool->uid}-write");
+        if (isset($request->permissions['write'])) {
+            $writeRole->roles()->sync($request->permissions['write']);
+        } else {
+            $writeRole->roles()->detach();
+        }
     }
 }
