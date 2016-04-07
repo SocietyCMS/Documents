@@ -4,20 +4,17 @@
     {{ trans('documents::documents.title.documents') }}
 @endsection
 
-@section('styles')
-    <link href="{{\Pingpong\Modules\Facades\Module::asset('documents:css/Documents.css')}}" rel="stylesheet"
-          type="text/css">
-@endsection
-
 @section('content')
 
-    <div class="ui top attached menu fileMenu" id="documentsApp">
+    <div class="ui menu fileMenu" id="documentsApp">
         @include('documents::backend.partials.menu')
     </div>
-    <div class="ui bottom attached segment grid fileBrowser">
 
-            <div class="two wide column treeView"> @include('documents::backend.partials.treeview')</div>
-            <div class="fourteen wide column fileView" id="fileView">@include('documents::backend.partials.multiview')</div>
+    <div id="fileBrowser">
+        <div class="container">
+            <div class="ui pointing vertical menu treeView"> @include('documents::backend.partials.treeview')</div>
+            <div class="ui segment fileView" id="fileView">@include('documents::backend.partials.multiview')</div>
+        </div>
     </div>
 
     @permission('documents::manage-pools')
@@ -45,5 +42,4 @@
         var resourceDocumentsPoolListFolder = '{{apiRoute('v1', 'api.documents.list_folder', ['pool' => ':uid'])}}';
     </script>
     <script src="{{\Pingpong\Modules\Facades\Module::asset('documents:bundle.js')}}"></script>
-
 @endsection
