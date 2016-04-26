@@ -150,7 +150,9 @@
 	            },
 
 	            uploadInProgress: false,
-	            uploadProgress: 0
+	            uploadProgress: 0,
+
+	            showLoader: false
 	        };
 	    },
 
@@ -180,12 +182,16 @@
 	                return;
 	            }
 
+	            this.showLoader = true;
+
 	            var resource = this.$resource(resourceDocumentsPoolListFolder);
 	            resource.get({ uid: this.selectedPool.uid }, { parent_uid: this.selectedParent }).then(function (response) {
 	                this.objects = response.data.data;
 	                this.meta = response.data.meta;
+	                this.showLoader = false;
 	            }.bind(this), function (response) {
 	                toastr.error(response.data.message, 'Error: ' + response.data.status_code);
+	                this.showLoader = false;
 	            }.bind(this));
 	        },
 
