@@ -7,6 +7,7 @@ export default {
             sortReverse: 1,
 
             editObject:null
+            
         }
     },
     template: list.template,

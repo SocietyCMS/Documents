@@ -1,5 +1,7 @@
 export function dragAndDropModule(VueInstance) {
 
+    var  uploaderInstance = fineUploaderBasicInstance(VueInstance)
+
     return new fineUploader.DragAndDrop({
         dropZoneElements: [document.getElementById('fileView')],
         classes: {
@@ -7,7 +9,7 @@ export function dragAndDropModule(VueInstance) {
         },
         callbacks: {
             processingDroppedFilesComplete: function (files, dropTarget) {
-                fineUploaderBasicInstance(VueInstance).addFiles(files);
+                uploaderInstance.addFiles(files);
             }
         }
     })
@@ -47,9 +49,7 @@ export function fineUploaderBasicInstance(VueInstance) {
                 VueInstance.fileUploadStart();
             },
             onTotalProgress: function (totalUploadedBytes, totalBytes) {
-                $('#uploadFileProgrssbar').progress({
-                    percent: Math.ceil(totalUploadedBytes / totalBytes * 100)
-                });
+                VueInstance.fileUploadTotalProgress(totalUploadedBytes, totalBytes);
             },
             onAllComplete: function (succeeded, failed) {
                 VueInstance.fileUploadAllComplete(succeeded, failed);

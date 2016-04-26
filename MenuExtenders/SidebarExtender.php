@@ -32,7 +32,7 @@ class SidebarExtender implements \Maatwebsite\Sidebar\SidebarExtender
     public function extendWith(Menu $menu)
     {
         $menu->group(trans('core::sidebar.collaboration'), function (Group $group) {
-            $group->weight(10);
+            $group->weight(12);
 
             $group->item(trans('documents::documents.title.documents'), function (Item $item) {
 

@@ -18,7 +18,10 @@ export default {
                 quota: 209715200,
                 readRoles: [],
                 writeRoles: []
-            }
+            },
+
+            uploadInProgress: false,
+            uploadProgress: 0,
         }
     },
     components: {pooltree,breadcrumb},
@@ -161,6 +164,13 @@ export default {
 
 
         fileUploadStart: function () {
+            this.uploadInProgress = true
+        },
+        fileUploadTotalProgress: function (totalUploadedBytes, totalBytes) {
+            this.uploadProgress = Math.ceil(totalUploadedBytes / totalBytes * 100)
+            $('#uploadProgressBarTop, #uploadProgressBarBottom').progress({
+                percent: this.uploadProgress
+            });
         },
         fileUploadComplete: function (id, name, responseJSON) {
             if(!responseJSON.success){
@@ -174,6 +184,10 @@ export default {
             }
         },
         fileUploadAllComplete: function (responseJSON) {
+            this.uploadInProgress = false
+            $('#uploadProgressBarTop, #uploadProgressBarBottom').progress({
+                percent: 0
+            });
         },
 
         createFolder: function (object, event) {

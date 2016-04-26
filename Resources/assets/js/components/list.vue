@@ -1,6 +1,5 @@
 <template>
 
-
     <table class="ui selectable table" id="file-list-table">
         <thead>
         <tr>
