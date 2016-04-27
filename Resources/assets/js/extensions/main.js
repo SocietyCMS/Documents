@@ -2,6 +2,8 @@
 import pooltree from '../components/pooltree.vue';
 import breadcrumb from '../components/breadcrumb.vue';
 
+import { dragAndDropModule } from '../extensions/upload.js';
+
 export default {
     data() {
         return {
@@ -29,9 +31,13 @@ export default {
     components: {pooltree,breadcrumb},
     watch: {
         '$route.params': function () {
-            this.selectPool()
-            this.selectParent()
+            this.selectPool();
+        },
+        'selectedPool': function () {
+            this.selectParent();
+            dragAndDropModule(this);
         }
+
     },
     ready() {
         this.requestPoolIndex();
@@ -99,15 +105,12 @@ export default {
             } else {
                 this.selectedPool = result[0];
             }
-
-            this.selectParent();
         },
 
         selectParent() {
             if(this.$route.params && this.$route.params.parent_uid) {
                 this.selectedParent = this.$route.params.parent_uid
             }
-
             this.requestObjectIndex();
         },
 

@@ -67,11 +67,9 @@
 
 	var _main2 = _interopRequireDefault(_main);
 
-	var _view = __webpack_require__(10);
+	var _view = __webpack_require__(11);
 
 	var _view2 = _interopRequireDefault(_view);
-
-	var _upload = __webpack_require__(13);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -109,8 +107,6 @@
 
 	router.start(App, '#societyAdmin');
 
-	(0, _upload.dragAndDropModule)(router.app);
-
 /***/ },
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
@@ -128,6 +124,8 @@
 	var _breadcrumb = __webpack_require__(7);
 
 	var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
+
+	var _upload = __webpack_require__(10);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -160,8 +158,12 @@
 	    watch: {
 	        '$route.params': function $routeParams() {
 	            this.selectPool();
+	        },
+	        'selectedPool': function selectedPool() {
 	            this.selectParent();
+	            (0, _upload.dragAndDropModule)(this);
 	        }
+
 	    },
 	    ready: function ready() {
 	        this.requestPoolIndex();
@@ -232,14 +234,11 @@
 	            } else {
 	                this.selectedPool = result[0];
 	            }
-
-	            this.selectParent();
 	        },
 	        selectParent: function selectParent() {
 	            if (this.$route.params && this.$route.params.parent_uid) {
 	                this.selectedParent = this.$route.params.parent_uid;
 	            }
-
 	            this.requestObjectIndex();
 	        },
 	        createPoolModal: function createPoolModal() {
@@ -460,6 +459,75 @@
 
 /***/ },
 /* 10 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.dragAndDropModule = dragAndDropModule;
+	exports.fineUploaderBasicInstance = fineUploaderBasicInstance;
+	function dragAndDropModule(VueInstance) {
+
+	    var uploaderInstance = fineUploaderBasicInstance(VueInstance);
+
+	    return new fineUploader.DragAndDrop({
+	        dropZoneElements: [document.getElementById('fileView')],
+	        classes: {
+	            dropActive: 'blue'
+	        },
+	        callbacks: {
+	            processingDroppedFilesComplete: function processingDroppedFilesComplete(files, dropTarget) {
+	                uploaderInstance.addFiles(files);
+	            }
+	        }
+	    });
+	};
+
+	function fineUploaderBasicInstance(VueInstance) {
+
+	    return new fineUploader.FineUploaderBasic({
+	        button: document.getElementById('uploadFileButton'),
+	        request: {
+	            endpoint: Vue.url(resourceDocumentsFileStore, { pool: VueInstance.$route.params.pool }),
+	            inputName: 'data-binary',
+	            customHeaders: {
+	                "Authorization": "Bearer " + societycms.jwtoken
+	            },
+	            params: {
+	                parent_uid: VueInstance.selectedParent
+	            }
+	        },
+	        callbacks: {
+
+	            onComplete: function onComplete(id, name, responseJSON) {
+	                VueInstance.fileUploadComplete(id, name, responseJSON);
+	            },
+	            onError: function onError(id, name, errorReason, XMLHttpRequest) {
+	                var responseJSON = JSON.parse(XMLHttpRequest.response);
+
+	                if (responseJSON.errors) {
+	                    toastr.error(responseJSON.errors[0], responseJSON.message);
+	                    this.editMode = null;
+	                    this.editObject = null;
+	                }
+	            },
+	            onUpload: function onUpload() {
+	                VueInstance.fileUploadStart();
+	            },
+	            onTotalProgress: function onTotalProgress(totalUploadedBytes, totalBytes) {
+	                VueInstance.fileUploadTotalProgress(totalUploadedBytes, totalBytes);
+	            },
+	            onAllComplete: function onAllComplete(succeeded, failed) {
+	                VueInstance.fileUploadAllComplete(succeeded, failed);
+	            }
+	        }
+	    });
+	};
+
+/***/ },
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -468,7 +536,7 @@
 	    value: true
 	});
 
-	var _list = __webpack_require__(11);
+	var _list = __webpack_require__(12);
 
 	var _list2 = _interopRequireDefault(_list);
 
@@ -571,11 +639,11 @@
 	};
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __vue_script__, __vue_template__
-	__vue_template__ = __webpack_require__(12)
+	__vue_template__ = __webpack_require__(13)
 	module.exports = __vue_script__ || {}
 	if (module.exports.__esModule) module.exports = module.exports.default
 	if (__vue_template__) {
@@ -594,79 +662,10 @@
 	})()}
 
 /***/ },
-/* 12 */
-/***/ function(module, exports) {
-
-	module.exports = "\n\n<table class=\"ui selectable table\" id=\"file-list-table\">\n    <thead>\n    <tr>\n        <th class=\"therteen wide filename\"\n            v-on:click=\"sortBy('title')\"\n            v-bind:class=\"{ 'sorted': sortKey == 'tag', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Title\n        </th>\n        <th class=\"\">\n        </th>\n        <th class=\"one wide right aligned\"\n            v-on:click=\"sortBy('objectSize')\"\n            v-bind:class=\"{ 'sorted': sortKey == 'objectSize', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Size\n        </th>\n        <th class=\"two wide right aligned\"\n            v-on:click=\"sortBy('created_at.timestamp')\"\n            v-bind:class=\"{ 'sorted': sortKey == 'created_at.timestamp', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Modified\n        </th>\n    </tr>\n    </thead>\n    <tbody>\n\n    <tr class=\"object\" v-bind:class=\"{'negative':object.deleted}\" v-for=\"object in objects | filterBy filterKey | advancedSort sortKey sortReverse\">\n        <td class=\"selectable\">\n            <a v-if=\"editObject != object\" href=\"\" v-on:click=\"objectOpen(object, $event)\">\n                <i v-bind:class=\"object.mimeType | semanticFileTypeClass\" class=\"icon\"></i>\n\n                <div class=\"ui text\">{{ object.title }}\n                    <span class=\"ui gray text\"\n                        v-if=\"object.fileExtension\">.{{ object.fileExtension }}\n                    </span>\n                </div>\n\n            </a>\n\n            <div class=\"ui right action left icon input\" v-else>\n                <i v-bind:class=\"object.mimeType | semanticFileTypeClass\" class=\"icon\"></i>\n                <input type=\"text\" id=\"objectEditInput-{{object.uid}}\"\n                       v-model=\"object.title\"\n                       v-on:blur=\"objectBlurEdit(object, $event)\"\n                       v-on:keydown=\"objectKeydownEdit(object, $event)\" >\n                <div class=\"ui icon primary button\" v-on:click=\"objectBlurEdit(object, $event)\">\n                    <i class=\"checkmark icon\"></i>\n                </div>\n            </div>\n        </td>\n        <td class=\"collapsing\">\n\n            <button class=\"circular ui icon positive button\" v-if=\"object.deleted\" v-on:click=\"objectRestore(object, $event)\"><i class=\"life ring icon\"></i></button>\n            <button class=\"circular ui icon negative button\" v-if=\"object.deleted\" v-on:click=\"objectForceDelete(object, $event)\"><i class=\"trash icon\"></i></button>\n\n            <button class=\"circular ui icon disabled button\" v-if=\"!object.deleted\"><i class=\"share alternate icon \"></i></button>\n\n            <div class=\"ui top left pointing dropdown\" v-if=\"!object.deleted\">\n                <button class=\"circular ui icon button\"><i class=\"ellipsis horizontal icon\"></i></button>\n\n                <div class=\"menu\">\n                    <div class=\"item\" v-on:click=\"objectOpen(object, $event)\">\n                        Open...\n                    </div>\n                    <div class=\"item\" v-on:click=\"objectEdit(object, $event)\">\n                        Rename\n                    </div>\n                    <div class=\"item\" v-on:click=\"objectDelete(object, $event)\">\n                        <i class=\"trash icon\"></i>\n                        Move to trash\n                    </div>\n                </div>\n            </div>\n\n        </td>\n        <td class=\"right aligned collapsing\" v-if=\"object.tag == 'file'\">{{ object.objectSize | humanReadableFilesize }}</td>\n        <td class=\"right aligned collapsing\" v-if=\"object.tag == 'folder'\">-</td>\n        <td class=\"right aligned collapsing\">{{ object.created_at.diffForHumans }}</td>\n    </tr>\n    </tbody>\n</table>\n\n";
-
-/***/ },
 /* 13 */
 /***/ function(module, exports) {
 
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.dragAndDropModule = dragAndDropModule;
-	exports.fineUploaderBasicInstance = fineUploaderBasicInstance;
-	function dragAndDropModule(VueInstance) {
-
-	    var uploaderInstance = fineUploaderBasicInstance(VueInstance);
-
-	    return new fineUploader.DragAndDrop({
-	        dropZoneElements: [document.getElementById('fileView')],
-	        classes: {
-	            dropActive: 'blue'
-	        },
-	        callbacks: {
-	            processingDroppedFilesComplete: function processingDroppedFilesComplete(files, dropTarget) {
-	                uploaderInstance.addFiles(files);
-	            }
-	        }
-	    });
-	};
-
-	function fineUploaderBasicInstance(VueInstance) {
-
-	    return new fineUploader.FineUploaderBasic({
-	        button: document.getElementById('uploadFileButton'),
-	        request: {
-	            endpoint: Vue.url(resourceDocumentsFileStore, { pool: VueInstance.$route.params.pool }),
-	            inputName: 'data-binary',
-	            customHeaders: {
-	                "Authorization": "Bearer " + societycms.jwtoken
-	            },
-	            params: {
-	                parent_uid: VueInstance.selectedParent
-	            }
-	        },
-	        callbacks: {
-
-	            onComplete: function onComplete(id, name, responseJSON) {
-	                VueInstance.fileUploadComplete(id, name, responseJSON);
-	            },
-	            onError: function onError(id, name, errorReason, XMLHttpRequest) {
-	                var responseJSON = JSON.parse(XMLHttpRequest.response);
-
-	                if (responseJSON.errors) {
-	                    toastr.error(responseJSON.errors[0], responseJSON.message);
-	                    this.editMode = null;
-	                    this.editObject = null;
-	                }
-	            },
-	            onUpload: function onUpload() {
-	                VueInstance.fileUploadStart();
-	            },
-	            onTotalProgress: function onTotalProgress(totalUploadedBytes, totalBytes) {
-	                VueInstance.fileUploadTotalProgress(totalUploadedBytes, totalBytes);
-	            },
-	            onAllComplete: function onAllComplete(succeeded, failed) {
-	                VueInstance.fileUploadAllComplete(succeeded, failed);
-	            }
-	        }
-	    });
-	};
+	module.exports = "\n\n<table class=\"ui selectable table\" id=\"file-list-table\">\n    <thead>\n    <tr>\n        <th class=\"therteen wide filename\"\n            v-on:click=\"sortBy('title')\"\n            v-bind:class=\"{ 'sorted': sortKey == 'tag', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Title\n        </th>\n        <th class=\"\">\n        </th>\n        <th class=\"one wide right aligned\"\n            v-on:click=\"sortBy('objectSize')\"\n            v-bind:class=\"{ 'sorted': sortKey == 'objectSize', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Size\n        </th>\n        <th class=\"two wide right aligned\"\n            v-on:click=\"sortBy('created_at.timestamp')\"\n            v-bind:class=\"{ 'sorted': sortKey == 'created_at.timestamp', 'ascending':sortReverse>0, 'descending':sortReverse<0}\">\n            Modified\n        </th>\n    </tr>\n    </thead>\n    <tbody>\n\n    <tr class=\"object\" v-bind:class=\"{'negative':object.deleted}\" v-for=\"object in objects | filterBy filterKey | advancedSort sortKey sortReverse\">\n        <td class=\"selectable\">\n            <a v-if=\"editObject != object\" href=\"\" v-on:click=\"objectOpen(object, $event)\">\n                <i v-bind:class=\"object.mimeType | semanticFileTypeClass\" class=\"icon\"></i>\n\n                <div class=\"ui text\">{{ object.title }}\n                    <span class=\"ui gray text\"\n                        v-if=\"object.fileExtension\">.{{ object.fileExtension }}\n                    </span>\n                </div>\n\n            </a>\n\n            <div class=\"ui right action left icon input\" v-else>\n                <i v-bind:class=\"object.mimeType | semanticFileTypeClass\" class=\"icon\"></i>\n                <input type=\"text\" id=\"objectEditInput-{{object.uid}}\"\n                       v-model=\"object.title\"\n                       v-on:blur=\"objectBlurEdit(object, $event)\"\n                       v-on:keydown=\"objectKeydownEdit(object, $event)\" >\n                <div class=\"ui icon primary button\" v-on:click=\"objectBlurEdit(object, $event)\">\n                    <i class=\"checkmark icon\"></i>\n                </div>\n            </div>\n        </td>\n        <td class=\"collapsing\">\n\n            <button class=\"circular ui icon positive button\" v-if=\"object.deleted\" v-on:click=\"objectRestore(object, $event)\"><i class=\"life ring icon\"></i></button>\n            <button class=\"circular ui icon negative button\" v-if=\"object.deleted\" v-on:click=\"objectForceDelete(object, $event)\"><i class=\"trash icon\"></i></button>\n\n            <button class=\"circular ui icon disabled button\" v-if=\"!object.deleted\"><i class=\"share alternate icon \"></i></button>\n\n            <div class=\"ui top left pointing dropdown\" v-if=\"!object.deleted\">\n                <button class=\"circular ui icon button\"><i class=\"ellipsis horizontal icon\"></i></button>\n\n                <div class=\"menu\">\n                    <div class=\"item\" v-on:click=\"objectOpen(object, $event)\">\n                        Open...\n                    </div>\n                    <div class=\"item\" v-on:click=\"objectEdit(object, $event)\">\n                        Rename\n                    </div>\n                    <div class=\"item\" v-on:click=\"objectDelete(object, $event)\">\n                        <i class=\"trash icon\"></i>\n                        Move to trash\n                    </div>\n                </div>\n            </div>\n\n        </td>\n        <td class=\"right aligned collapsing\" v-if=\"object.tag == 'file'\">{{ object.objectSize | humanReadableFilesize }}</td>\n        <td class=\"right aligned collapsing\" v-if=\"object.tag == 'folder'\">-</td>\n        <td class=\"right aligned collapsing\">{{ object.created_at.diffForHumans }}</td>\n    </tr>\n    </tbody>\n</table>\n\n";
 
 /***/ },
 /* 14 */
