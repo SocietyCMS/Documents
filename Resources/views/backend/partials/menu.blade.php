@@ -3,19 +3,15 @@
 
     <div class="menu">
         <div class="item" id="uploadFileButton" v-show="selectedPool && selectedPool.userPermissions.write">
-            Upload
+            {{trans('documents::documents.action.upload')}}
         </div>
         <div class="item" v-on:click="createFolder(object, $event)" v-if="selectedPool && selectedPool.userPermissions.write">
-            New Folder
+            {{trans('documents::documents.action.new folder')}}
         </div>
-
         @permission('documents::manage-pools')
             <div class="divider"></div>
-            <div class="header">
-                Pools
-            </div>
-            <div class="item" v-on:click="createPoolModal">New...</div>
-            <div class="item" v-on:click="permissionPoolModal">Edit...</div>
+            <div class="item" v-on:click="createPoolModal">{{trans('core::elements.action.create resource', ['name'=>trans('documents::documents.title.pool')])}}</div>
+            <div class="item" v-on:click="permissionPoolModal">{{trans('documents::documents.menu.manage pools')}}</div>
         @endpermission
     </div>
 </div>

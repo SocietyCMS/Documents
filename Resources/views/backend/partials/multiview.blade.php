@@ -3,7 +3,7 @@
 </div>
 
 <div class="ui active inverted dimmer" v-show="showLoader">
-    <div class="ui medium text loader">Loading</div>
+    <div class="ui medium text loader">{{ trans('core::elements.progress.loading') }}</div>
 </div>
 
 <router-view  :pool="selectedPool" :objects="objects"></router-view>
