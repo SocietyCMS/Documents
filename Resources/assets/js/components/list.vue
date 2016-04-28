@@ -6,19 +6,19 @@
             <th class="therteen wide filename"
                 v-on:click="sortBy('title')"
                 v-bind:class="{ 'sorted': sortKey == 'tag', 'ascending':sortReverse>0, 'descending':sortReverse<0}">
-                Title
+                {{{ 'documents::documents.list.title' | trans }}}
             </th>
             <th class="">
             </th>
             <th class="one wide right aligned"
                 v-on:click="sortBy('objectSize')"
                 v-bind:class="{ 'sorted': sortKey == 'objectSize', 'ascending':sortReverse>0, 'descending':sortReverse<0}">
-                Size
+                {{{ 'documents::documents.list.size' | trans }}}
             </th>
             <th class="two wide right aligned"
                 v-on:click="sortBy('created_at.timestamp')"
                 v-bind:class="{ 'sorted': sortKey == 'created_at.timestamp', 'ascending':sortReverse>0, 'descending':sortReverse<0}">
-                Modified
+                {{{ 'documents::documents.list.modified' | trans }}}
             </th>
         </tr>
         </thead>
@@ -60,14 +60,14 @@
 
                     <div class="menu">
                         <div class="item" v-on:click="objectOpen(object, $event)">
-                            Open...
+                            {{{ 'documents::documents.contextmenu.open' | trans }}}
                         </div>
                         <div class="item" v-on:click="objectEdit(object, $event)">
-                            Rename
+                            {{{ 'documents::documents.contextmenu.rename' | trans }}}
                         </div>
                         <div class="item" v-on:click="objectDelete(object, $event)">
                             <i class="trash icon"></i>
-                            Move to trash
+                            {{{ 'documents::documents.contextmenu.move to trash' | trans }}}
                         </div>
                     </div>
                 </div>

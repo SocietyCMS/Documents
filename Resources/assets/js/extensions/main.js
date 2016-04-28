@@ -205,7 +205,7 @@ export default {
                 mimeType: "application/x-directory",
                 parent_uid: this.selectedParent,
                 pool_uid: this.selectedPool.uid,
-                title: "New Folder"
+                title: Lang.get('documents::documents.action.new folder')
             };
 
             var resource = this.$resource(resourceDocumentsFolderStore);

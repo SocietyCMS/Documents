@@ -1,20 +1,30 @@
 <?php
 
 return [
-    'title' => [
+    'title'       => [
         'documents' => 'Documents',
         'pool'      => 'Pool',
     ],
-    'action' => [
-        'upload' => 'Upload',
-        'new folder' => 'New Folder'
+    'action'      => [
+        'upload'     => 'Upload',
+        'new folder' => 'New Folder',
     ],
-    'menu' =>  [
-        'manage pools' => 'Manage pools'
+    'menu'        => [
+        'manage pools' => 'Manage pools',
     ],
-    'modal' => [
+    'modal'       => [
         'title'       => 'Title',
         'quota'       => 'Quota',
         'permissions' => 'Permissions',
+    ],
+    'list'        => [
+        'title'    => 'Title',
+        'size'     => 'Size',
+        'modified' => 'Modified',
+    ],
+    'contextmenu' => [
+        'open'          => 'Open...',
+        'rename'        => 'Rename',
+        'move to trash' => 'Move to trash',
     ],
 ];
