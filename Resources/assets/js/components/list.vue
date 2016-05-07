@@ -80,4 +80,12 @@
         </tbody>
     </table>
 
+    <div v-if="objects.length == 0">
+        <h1 class="ui center aligned icon header" id="noPhotosPlaceholder">
+            <i class="grey cloud upload icon"></i>
+            This pool is empty
+            <div class="sub header">You can drag&amp;drop files here to upload or click the wrench icon for more options.</div>
+        </h1>
+    </div>
+
 </template>
