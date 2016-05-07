@@ -27,4 +27,8 @@ return [
         'rename'        => 'Rename',
         'move to trash' => 'Move to trash',
     ],
+    'info' => [
+        'this pool is empty' => 'This pool is empty',
+        'drag-drop upload' => 'You can drag&drop files here to upload or click the wrench icon for more options.'
+    ]
 ];

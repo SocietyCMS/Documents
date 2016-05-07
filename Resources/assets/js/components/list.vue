@@ -50,10 +50,10 @@
             </td>
             <td class="collapsing">
 
-                <button class="circular ui icon positive button" v-if="object.deleted" v-on:click="objectRestore(object, $event)"><i class="life ring icon"></i></button>
-                <button class="circular ui icon negative button" v-if="object.deleted" v-on:click="objectForceDelete(object, $event)"><i class="trash icon"></i></button>
+                <button class="circular ui icon positive button" v-if="object.deleted && pool.userPermissions.write" v-on:click="objectRestore(object, $event)"><i class="life ring icon"></i></button>
+                <button class="circular ui icon negative button" v-if="object.deleted && pool.userPermissions.write" v-on:click="objectForceDelete(object, $event)"><i class="trash icon"></i></button>
 
-                <button class="circular ui icon disabled button" v-if="!object.deleted"><i class="share alternate icon "></i></button>
+                <button class="circular ui icon disabled button" v-if="!object.deleted && pool.userPermissions.write"><i class="share alternate icon "></i></button>
 
                 <div class="ui top left pointing dropdown" v-if="!object.deleted">
                     <button class="circular ui icon button"><i class="ellipsis horizontal icon"></i></button>
@@ -62,10 +62,10 @@
                         <div class="item" v-on:click="objectOpen(object, $event)">
                             {{{ 'documents::documents.contextmenu.open' | trans }}}
                         </div>
-                        <div class="item" v-on:click="objectEdit(object, $event)">
+                        <div class="item" v-on:click="objectEdit(object, $event)"  v-if="pool.userPermissions.write">
                             {{{ 'documents::documents.contextmenu.rename' | trans }}}
                         </div>
-                        <div class="item" v-on:click="objectDelete(object, $event)">
+                        <div class="item" v-on:click="objectDelete(object, $event)"  v-if="pool.userPermissions.write">
                             <i class="trash icon"></i>
                             {{{ 'documents::documents.contextmenu.move to trash' | trans }}}
                         </div>
@@ -83,8 +83,8 @@
     <div v-if="objects.length == 0">
         <h1 class="ui center aligned icon header" id="noPhotosPlaceholder">
             <i class="grey cloud upload icon"></i>
-            This pool is empty
-            <div class="sub header">You can drag&amp;drop files here to upload or click the wrench icon for more options.</div>
+            {{{ 'documents::documents.info.this pool is empty' | trans }}}
+            <div class="sub header" v-if="pool.userPermissions.write">{{{ 'documents::documents.info.drag-drop upload' | trans }}}</div>
         </h1>
     </div>
 

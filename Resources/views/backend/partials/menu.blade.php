@@ -1,4 +1,4 @@
-<div class="ui dropdown icon item">
+<div class="ui dropdown icon item" v-if="!selectedPool || selectedPool.userPermissions.write">
     <i class="wrench icon"></i>
 
     <div class="menu">
