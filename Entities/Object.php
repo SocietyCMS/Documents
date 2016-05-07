@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Modules\Core\Traits\Entities\EloquentHashids;
-use Modules\User\Traits\Activity\RecordsActivity;
+use Modules\Core\Traits\Activity\RecordsActivity;
 
 
 /**
