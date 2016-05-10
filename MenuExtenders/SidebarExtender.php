@@ -34,7 +34,7 @@ class SidebarExtender implements \Maatwebsite\Sidebar\SidebarExtender
         $menu->group(trans('core::sidebar.collaboration'), function (Group $group) {
             $group->weight(12);
 
-            $group->item(trans('documents::documents.title.documents'), function (Item $item) {
+            $group->item(trans('documents::module.title'), function (Item $item) {
 
                 $item->route('backend::documents.documents.index');
                 $item->authorize(
