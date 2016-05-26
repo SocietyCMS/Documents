@@ -84,7 +84,7 @@
         <h1 class="ui center aligned icon header" id="noPhotosPlaceholder">
             <i class="grey cloud upload icon"></i>
             {{{ 'documents::documents.info.this pool is empty' | trans }}}
-            <div class="sub header" v-if="pool.userPermissions.write">{{{ 'documents::documents.info.drag-drop upload' | trans }}}</div>
+            <div class="sub header" v-if="pool && pool.userPermissions.write">{{{ 'documents::documents.info.drag-drop upload' | trans }}}</div>
         </h1>
     </div>
 
