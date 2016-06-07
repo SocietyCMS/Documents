@@ -59,6 +59,13 @@ class Object extends Model
     protected static $recordEvents = ['created'];
 
     /**
+     * Privacy setting for the dashboard. Only show Documents to logged in users.
+     *
+     * @var string
+     */
+    protected static $activityPrivacy = 'protected';
+
+    /**
      * Get the pool that this object belongs to.
      */
     public function getFQPath()
